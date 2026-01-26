@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { NAV_LINKS } from '../constants';
-import logo from "../assets/image/imaji_logo.PNG";
+import logo from "../assets/image/imaji_logo_1.png";
 
 interface NavbarProps {
   onLinkClick?: () => void;

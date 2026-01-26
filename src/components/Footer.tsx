@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Twitter, Mail, Send, ArrowUp, Phone, MapPin } from 'lucide-react';
 import { NAV_LINKS, CATEGORIES } from '../constants';
-import logo from "../assets/image/imaji_logo.png";
+import logo from "../assets/image/imaji_logo_1.png";
 
 interface FooterProps {
   onLinkClick?: () => void;
