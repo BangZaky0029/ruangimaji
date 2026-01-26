@@ -96,7 +96,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   const videos = PORTFOLIO_DATA.Video;
   const currentBackground = viewMode === 'Video' ? videos[activeVideoIdx].imageUrl : photos[activePhotoIdx].imageUrl;
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (info: PanInfo) => {
     // Only trigger if horizontal intent is clearly stronger than vertical intent
     const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
     if (Math.abs(info.offset.x) > SWIPE_THRESHOLD && isHorizontal) {
