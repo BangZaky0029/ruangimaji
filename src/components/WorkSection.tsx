@@ -1,5 +1,4 @@
 
-//C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\WorkSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type {PanInfo} from 'framer-motion';
@@ -109,11 +108,8 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
     }
   };
 
-
-
   return (
     <section id="work" className="relative h-screen bg-[#fbfaf8] overflow-hidden flex items-center justify-center">
-      {/* Immersive Background - No pointer events to allow background scrolling */}
       <AnimatePresence mode="wait">
         <motion.div 
           key={currentBackground} 
@@ -136,7 +132,6 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
 
       <div className="container mx-auto px-6 md:px-24 relative z-10 flex h-full items-center justify-center pointer-events-none">
         
-        {/* Sidebar Navigation - Moves based on viewMode */}
         <div className="absolute inset-y-0 left-6 right-6 md:left-12 md:right-12 z-50 flex items-center pointer-events-none">
           <motion.div 
             layout
@@ -172,14 +167,12 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
           </motion.div>
         </div>
 
-        {/* Main Interactive Area - Only images/videos intercept horizontal drag, pan-y allows background scroll */}
         <motion.div 
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           onDragEnd={handleDragEnd}
           className="relative w-full h-full flex items-center justify-between pointer-events-auto cursor-grab active:cursor-grabbing touch-pan-y"
         >
-          {/* Photo Side */}
           <motion.div 
             animate={{ 
               x: viewMode === 'Photo' ? (window.innerWidth < 768 ? '0%' : '25%') : '-100%', 
@@ -192,7 +185,6 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
              ))}
           </motion.div>
 
-          {/* Video Side */}
           <motion.div 
             animate={{ 
               x: viewMode === 'Video' ? (window.innerWidth < 768 ? '0%' : '-25%') : '100%', 
@@ -207,7 +199,6 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
         </motion.div>
       </div>
 
-      {/* Navigation Controls Overlay */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-12 z-40 bg-white/20 backdrop-blur-2xl px-10 py-4 rounded-full border border-white/30 shadow-2xl">
          <div className="flex items-center gap-4 border-r border-[#c5a059]/30 pr-8 text-[#2d2a26]">
             <span className="hidden md:inline text-[9px] font-bold opacity-40 uppercase tracking-widest">Active Focus</span>
@@ -223,14 +214,16 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
          </div>
       </div>
 
-      {/* Video Lightbox */}
       <AnimatePresence>
         {selectedVideo && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-white/95 backdrop-blur-3xl flex items-center justify-center p-6">
-            <button onClick={() => setSelectedVideo(null)} className="absolute top-10 right-10 w-16 h-16 rounded-full bg-[#c5a059]/10 hover:bg-[#c5a059] hover:text-white text-[#2d2a26] transition-all flex items-center justify-center z-[110]">
-              <X size={28} />
-            </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-white/95 backdrop-blur-3xl flex items-center justify-center p-6">
             <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className={`relative bg-black rounded-3xl overflow-hidden shadow-2xl ${videoAspect === 'portrait' ? 'max-w-[400px] aspect-[9/16]' : 'max-w-[1200px] aspect-[16/9]'} w-full`}>
+              <button 
+                onClick={() => setSelectedVideo(null)} 
+                className="absolute top-4 right-4 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 text-white transition-all flex items-center justify-center z-[210] border border-white/10"
+              >
+                <X size={24} />
+              </button>
               <video autoPlay controls src={selectedVideo} className="w-full h-full object-cover" />
             </motion.div>
           </motion.div>

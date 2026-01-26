@@ -42,7 +42,7 @@ const ContactSection: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const phoneNumber = "628988761937";
+    const phoneNumber = "62895428433006";
     const message = `Halo RUANG IMAJI, saya *${formData.name}*.\n\nSaya ingin reservasi untuk:\n- *Paket*: ${formData.selectedPackage}\n- *Kategori*: ${formData.category}\n- *Alamat*: ${formData.address}\n${formData.locationLink ? `- *Link Lokasi*: ${formData.locationLink}` : ''}\n\nMohon informasi lebih lanjut. Terima kasih!`;
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };

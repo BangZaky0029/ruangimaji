@@ -115,7 +115,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
                 <div className="mt-1 text-[#c5a059]"><Phone size={16} /></div>
                 <div>
                   <p className="text-[10px] uppercase font-bold text-[#2d2a26]/30 tracking-widest mb-1">Office Line</p>
-                  <p className="text-sm text-[#2d2a26] group-hover:text-[#c5a059] transition-colors">+62 898 876 1937</p>
+                  <p className="text-sm text-[#2d2a26] group-hover:text-[#c5a059] transition-colors">+62 8954 2843 3006</p>
                 </div>
               </a>
               <div className="flex items-start gap-4">
