@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Scrollbar custom */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f3eee5;
+}
+::-webkit-scrollbar-thumb {
+    background: #c5a059;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #b38d47;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Serif font utility */
+.font-serif {
+    font-family: 'Playfair Display', serif;
+}

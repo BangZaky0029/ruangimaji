@@ -1,0 +1,8 @@
+
+{
+  "name": "RUANG IMAJI Creative Agency",
+  "description": "A high-end modern creative agency portfolio website featuring dynamic background slideshows, horizontal scrolling portfolios, and smooth Framer Motion transitions.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
