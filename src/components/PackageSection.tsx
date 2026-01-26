@@ -2,7 +2,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Send, Zap } from 'lucide-react';
-import { PACKAGES, Package } from '../constants';
+import { PACKAGES } from '../constants';
+import type {Package} from '../constants'
 
 const PackageSection: React.FC = () => {
   const handleBooking = (pkg: Package | 'Enterprise') => {
