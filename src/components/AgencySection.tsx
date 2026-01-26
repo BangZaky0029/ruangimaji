@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type {PanInfo} from 'framer-motion';
@@ -29,7 +28,7 @@ const TEAM_MEMBERS = [
 ];
 
 const AgencySection: React.FC = () => {
-  const [activeIdx, setActiveIdx] = useState(1); // Start with center member
+  const [activeIdx, setActiveIdx] = useState(1);
 
   const stats = [
     { label: 'Global Projects', value: '150+', icon: <Globe size={18} /> },
@@ -45,7 +44,7 @@ const AgencySection: React.FC = () => {
     setActiveIdx((prev) => (prev - 1 + TEAM_MEMBERS.length) % TEAM_MEMBERS.length);
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     if (info.offset.x > 50) prevMember();
     else if (info.offset.x < -50) nextMember();
   };
@@ -53,10 +52,6 @@ const AgencySection: React.FC = () => {
   return (
     <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden">
       
-      {/* 
-          Large Artistic Background Typography 
-          Spread out more vertically to fill the long scroll on mobile
-      */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none flex flex-col justify-around items-center opacity-[0.04] z-0">
         <h2 className="text-[35vw] md:text-[30vw] font-serif font-bold italic tracking-tighter leading-none -rotate-12 translate-x-[-15%] select-none">Studio</h2>
         <h2 className="text-[30vw] md:text-[25vw] font-serif font-bold italic tracking-tighter leading-none -rotate-12 translate-x-[20%] select-none">Our Team</h2>
@@ -66,7 +61,6 @@ const AgencySection: React.FC = () => {
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           
-          {/* Left Column: Manifesto & Vision */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -106,7 +100,6 @@ const AgencySection: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Right Column: 3D Cover Flow Carousel */}
           <div className="relative w-full z-20 mt-16 lg:mt-0">
             <div className="text-center mb-8 md:mb-12">
               <AnimatePresence mode="wait">

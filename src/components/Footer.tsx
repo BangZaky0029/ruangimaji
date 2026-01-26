@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Twitter, Mail, Send, ArrowUp, Phone, MapPin } from 'lucide-react';
 import { NAV_LINKS, CATEGORIES } from '../constants';
-import logo from "../assets/image/imaji_logo.PNG";
+import logo from "../assets/image/imaji_logo.png";
 
 interface FooterProps {
   onLinkClick?: () => void;
@@ -42,13 +42,10 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
     <footer className="bg-white pt-24 pb-12 border-t border-[#c5a059]/10 relative">
       <div className="container mx-auto px-6 md:px-12">
         
-        {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
           
-          {/* Brand & Manifesto */}
           <div className="lg:col-span-1 space-y-6">
             <div className="flex flex-col items-start">
-              {/* Resized and realigned logo */}
               <img 
                 src={logo} 
                 alt="RUANG IMAJI" 
@@ -72,7 +69,6 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="space-y-8">
             <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-[#2d2a26]">Company</h4>
             <ul className="space-y-4">
@@ -91,7 +87,6 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
             </ul>
           </div>
 
-          {/* Our Expertise / Categories */}
           <div className="space-y-8">
             <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-[#2d2a26]">Expertise</h4>
             <ul className="grid grid-cols-1 gap-4">
@@ -106,7 +101,6 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div className="space-y-8">
             <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-[#2d2a26]">Connect</h4>
             <div className="space-y-6">
@@ -135,7 +129,6 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
           </div>
         </div>
 
-        {/* Bottom Banner */}
         <div className="border-t border-[#f3eee5] pt-12 flex flex-col lg:flex-row justify-between items-center gap-8">
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
             <p className="text-[10px] text-[#2d2a26]/30 tracking-widest uppercase font-bold">
@@ -165,7 +158,6 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
         </div>
       </div>
 
-      {/* Background Accent */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#c5a059]/5 rounded-full blur-[120px] pointer-events-none -mr-20 -mt-20" />
     </footer>
   );

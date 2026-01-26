@@ -1,4 +1,5 @@
 
+//C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\WorkSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type {PanInfo} from 'framer-motion';
