@@ -96,21 +96,19 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   const videos = PORTFOLIO_DATA.Video;
   const currentBackground = viewMode === 'Video' ? videos[activeVideoIdx].imageUrl : photos[activePhotoIdx].imageUrl;
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-  // Only trigger if horizontal intent is clearly stronger than vertical intent
-  const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
-  if (Math.abs(info.offset.x) > SWIPE_THRESHOLD && isHorizontal) {
-    if (info.offset.x > 0) {
-      // Swiped Right -> Previous
-      if (viewMode === 'Video') setActiveVideoIdx(p => Math.max(0, p - 1));
-      else setActivePhotoIdx(p => Math.max(0, p - 1));
-    } else {
-      // Swiped Left -> Next
-      if (viewMode === 'Video') setActiveVideoIdx(p => Math.min(videos.length - 1, p + 1));
-      else setActivePhotoIdx(p => Math.min(photos.length - 1, p + 1));
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
+    if (Math.abs(info.offset.x) > SWIPE_THRESHOLD && isHorizontal) {
+      if (info.offset.x > 0) {
+        if (viewMode === 'Video') setActiveVideoIdx(p => Math.max(0, p - 1));
+        else setActivePhotoIdx(p => Math.max(0, p - 1));
+      } else {
+        if (viewMode === 'Video') setActiveVideoIdx(p => Math.min(videos.length - 1, p + 1));
+        else setActivePhotoIdx(p => Math.min(photos.length - 1, p + 1));
+      }
     }
-  }
-};
+  };
+
 
 
   return (
