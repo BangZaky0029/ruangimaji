@@ -2,12 +2,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Send, Zap } from 'lucide-react';
-import { PACKAGES } from '../constants';
+import { PACKAGES, Package } from '../constants';
 
 const PackageSection: React.FC = () => {
-  const handleBooking = (packageName: string) => {
+  const handleBooking = (pkg: Package | 'Enterprise') => {
     const phoneNumber = "62895428433006";
-    const message = `Halo Ruang Imaji, saya tertarik untuk booking paket *${packageName}*. Bisa bantu proses selanjutnya?`;
+    let message = "";
+
+    if (pkg === 'Enterprise') {
+      message = "Halo Ruang Imaji, saya tertarik dengan layanan Enterprise & Global Campaigns. Bisa bantu proses penawaran custom?";
+    } else {
+      const photoDetails = pkg.deliverables.photo.map(item => `- ${item}`).join('\n');
+      const videoDetails = pkg.deliverables.video.map(item => `- ${item}`).join('\n');
+      
+      message = `Halo Ruang Imaji, saya tertarik untuk booking paket *${pkg.name}* (${pkg.price}).\n\n` +
+                `*Detail Photography:*\n${photoDetails}\n\n` +
+                `*Detail Videography:*\n${videoDetails}\n\n` +
+                `Bisa bantu proses selanjutnya?`;
+    }
+    
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -80,7 +93,7 @@ const PackageSection: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05, backgroundColor: '#c5a059', color: '#fff' }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleBooking(pkg.name)}
+                onClick={() => handleBooking(pkg)}
                 className={`w-full py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all ${pkg.name === 'PREMIUM' ? 'bg-[#c5a059] text-white' : 'bg-[#f3eee5] text-[#2d2a26]'}`}
               >
                 Secure Reservation <Send size={14} />
