@@ -55,7 +55,7 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
       onClick={onClick}
       className={`absolute cursor-pointer flex flex-col items-center pointer-events-auto ${side === 'left' ? 'left-0' : 'right-0'}`}
     >
-      <div className={`relative group overflow-hidden rounded-2xl transition-all duration-500 border-2 ${isCenter ? 'border-[#c5a059] shadow-2xl shadow-[#c5a059]/20 w-[240px] md:w-[320px]' : 'border-[#2d2a26]/5 w-[160px] md:w-[200px]'} aspect-square md:aspect-[4/5] bg-black`}>
+      <div className={`relative group overflow-hidden rounded-2xl transition-all duration-500 border-2 ${isCenter ? 'border-[#c5a059] shadow-2xl shadow-[#c5a059]/20 w-[280px] md:w-[350px]' : 'border-[#2d2a26]/5 w-[160px] md:w-[200px]'} aspect-[3/4] md:aspect-[4/5] bg-black`}>
         <AnimatePresence mode="wait">
           {isPlaying && item.video_url ? (
             <motion.div 
@@ -63,22 +63,22 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black"
+              className="absolute inset-0 z-50 bg-black flex items-center justify-center"
             >
               {isYouTubeUrl(item.video_url) ? (
                 <iframe 
                   src={getYouTubeEmbedUrl(item.video_url, { autoplay: 1 })}
-                  className="w-full h-full"
+                  className="w-full h-full absolute inset-0"
                   allow="autoplay; fullscreen"
                 />
               ) : (
-                <video src={item.video_url} className="w-full h-full object-cover" autoPlay controls playsInline />
+                <video src={item.video_url} className="w-full h-full object-contain" autoPlay controls playsInline />
               )}
               <button 
                 onClick={(e) => { e.stopPropagation(); onClose(); }}
-                className="absolute top-4 right-4 z-[60] w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c5a059] transition-colors"
+                className="absolute top-4 right-4 z-[60] w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-[#c5a059] transition-colors border border-white/20"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </motion.div>
           ) : (

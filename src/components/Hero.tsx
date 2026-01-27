@@ -89,12 +89,13 @@ const Hero: React.FC = () => {
   const isCurrentYouTube = isYouTubeUrl(currentSlide.video_url);
 
   return (
-    <section className="relative h-screen w-full bg-[#fbfaf8] overflow-hidden flex items-center">
+    <section className="relative h-screen w-full bg-black overflow-hidden flex items-center">
+      {/* Background Image Placeholder while loading */}
       <div className="absolute inset-0 z-0">
         <img 
           src={currentSlide.image_url} 
           alt="Background Placeholder"
-          className="w-full h-full object-cover blur-sm opacity-20"
+          className="w-full h-full object-cover blur-sm opacity-40 scale-110"
         />
       </div>
 
@@ -104,17 +105,24 @@ const Hero: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 1.2 }}
           className="absolute inset-0 z-[1]"
         >
           {isCurrentYouTube ? (
-            <iframe
-              src={getYouTubeEmbedUrl(currentSlide.video_url, { autoplay: 1, mute: isMuted ? 1 : 0, controls: 0, loop: 1 })}
-              allow="autoplay; fullscreen; picture-in-picture"
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vh] pointer-events-none"
-              style={{ minWidth: '100vw', minHeight: '100vh', objectFit: 'cover' }}
-              title={currentSlide.title}
-            />
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
+              <iframe
+                src={getYouTubeEmbedUrl(currentSlide.video_url, { autoplay: 1, mute: isMuted ? 1 : 0, controls: 0, loop: 1 })}
+                allow="autoplay; fullscreen; picture-in-picture"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ 
+                  width: 'max(100vw, 177.77vh)', 
+                  height: 'max(100vh, 56.25vw)',
+                  minWidth: '100%', 
+                  minHeight: '100%' 
+                }}
+                title={currentSlide.title}
+              />
+            </div>
           ) : (
             <video
               ref={videoRef}
@@ -131,13 +139,15 @@ const Hero: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute inset-0 z-[2] bg-gradient-to-r from-[#fbfaf8] via-transparent to-transparent opacity-80" />
+      {/* Cinematic Overlays */}
+      <div className="absolute inset-0 z-[2] bg-gradient-to-r from-black/60 via-black/20 to-transparent md:from-[#fbfaf8]/80 md:via-transparent md:to-transparent" />
+      <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/80 via-transparent to-black/20 md:hidden" />
 
       <div className="absolute bottom-12 left-6 md:left-24 z-[40] flex flex-col gap-6 items-start">
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="h-14 bg-[#c5a059] text-white text-[10px] uppercase tracking-[0.3em] font-bold px-12 rounded-full shadow-lg shadow-[#c5a059]/20 whitespace-nowrap"
+          className="h-12 md:h-14 bg-[#c5a059] text-white text-[10px] uppercase tracking-[0.3em] font-bold px-10 md:px-12 rounded-full shadow-lg shadow-[#c5a059]/20 whitespace-nowrap"
         >
           Cinematic Portfolio
         </motion.button>
@@ -151,9 +161,9 @@ const Hero: React.FC = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleMute}
-            className="w-14 h-14 rounded-full bg-[#c5a059] text-white flex items-center justify-center shadow-lg shadow-[#c5a059]/20 relative z-10"
+            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#c5a059] text-white flex items-center justify-center shadow-lg shadow-[#c5a059]/20 relative z-10"
           >
-            {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </motion.button>
 
           <AnimatePresence>
@@ -163,7 +173,7 @@ const Hero: React.FC = () => {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -20, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className="absolute left-16 bg-white/20 backdrop-blur-xl rounded-full px-6 py-4 border border-white/30 shadow-2xl flex items-center gap-4 min-w-[200px]"
+                className="absolute left-14 md:left-16 bg-white/20 backdrop-blur-xl rounded-full px-5 py-3 border border-white/30 shadow-2xl flex items-center gap-4 min-w-[160px] md:min-w-[200px]"
               >
                 <input
                   type="range"
@@ -171,33 +181,32 @@ const Hero: React.FC = () => {
                   max="100"
                   value={volume}
                   onChange={handleVolumeChange}
-                  className="flex-1 h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer"
-                  style={{ background: `linear-gradient(to right, #c5a059 0%, #c5a059 ${volume}%, rgba(255,255,255,0.2) ${volume}%, rgba(255,255,255,0.2) 100%)` }}
+                  className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-[#c5a059]"
                 />
-                <span className="text-white text-xs font-bold font-mono min-w-[32px] text-right">{volume}%</span>
+                <span className="text-white text-[10px] font-bold font-mono min-w-[28px] text-right">{volume}%</span>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
         
         {!isCurrentYouTube && (
-          <div className="flex items-center gap-8 mt-2">
+          <div className="flex items-center gap-6 md:gap-8 mt-2">
             <motion.button 
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={togglePlay}
-              className="w-16 h-16 rounded-full bg-white border-2 border-[#c5a059] text-[#2d2a26] flex items-center justify-center shadow-xl transition-colors"
+              className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white border-2 border-[#c5a059] text-[#2d2a26] flex items-center justify-center shadow-xl transition-colors"
             >
-              {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} className="ml-1" fill="currentColor" />}
+              {isPlaying ? <Pause size={20} md:size={24} fill="currentColor" /> : <Play size={20} md:size={24} className="ml-1" fill="currentColor" />}
             </motion.button>
 
             <motion.div 
-              className="bg-white/10 backdrop-blur-xl rounded-full px-8 py-5 flex items-center gap-8 border border-white/20 shadow-2xl min-w-[280px] md:min-w-[420px]"
+              className="bg-white/10 backdrop-blur-xl rounded-full px-6 md:px-8 py-4 md:py-5 flex items-center gap-6 md:gap-8 border border-white/20 shadow-2xl min-w-[200px] md:min-w-[420px]"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="flex-grow relative h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div className="flex-grow relative h-1 bg-white/20 rounded-full overflow-hidden">
                 <motion.div 
                   className="absolute inset-y-0 left-0 bg-[#c5a059]"
                   style={{ width: `${progress}%` }}
@@ -211,7 +220,7 @@ const Hero: React.FC = () => {
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
               </div>
-              <div className="text-[12px] text-white font-mono tracking-widest min-w-[36px] font-bold">
+              <div className="text-[10px] md:text-[12px] text-white font-mono tracking-widest min-w-[30px] font-bold">
                 {progress.toFixed(0)}%
               </div>
             </motion.div>
@@ -220,21 +229,21 @@ const Hero: React.FC = () => {
       </div>
 
       <div className="relative z-10 w-full px-6 md:px-24 flex flex-col md:flex-row items-center justify-between gap-12 h-full pt-20">
-        <div className="max-w-2xl w-full mt-auto mb-64 md:mb-72">
+        <div className="max-w-2xl w-full mt-auto mb-48 md:mb-72">
           <motion.div
             key={`content-${activeIdx}`}
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="w-8 h-[1px] bg-[#c5a059]/50"></span>
-              <span className="text-[#c5a059] text-[10px] uppercase tracking-widest font-bold font-mono">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="w-8 h-[1px] bg-[#c5a059]"></span>
+              <span className="text-[#c5a059] text-[10px] md:text-[11px] uppercase tracking-[0.4em] font-bold font-mono">
                 {currentSlide.location}
               </span>
             </div>
 
-            <h1 className="text-6xl md:text-8xl lg:text-[8.5rem] font-bold leading-[0.85] tracking-tighter mb-8 font-serif text-[#2d2a26]">
+            <h1 className="text-5xl md:text-8xl lg:text-[8.5rem] font-bold leading-[0.9] md:leading-[0.85] tracking-tighter mb-8 font-serif text-white md:text-[#2d2a26]">
               {currentSlide.title.split(' ').map((word, i) => (
                 <React.Fragment key={i}>
                   {word}<br />
@@ -242,7 +251,7 @@ const Hero: React.FC = () => {
               ))}
             </h1>
             
-            <p className="text-[#2d2a26]/60 text-sm md:text-base max-w-sm mb-10 leading-relaxed font-light">
+            <p className="text-white/70 md:text-[#2d2a26]/60 text-sm md:text-base max-w-sm mb-10 leading-relaxed font-light">
               {currentSlide.description}
             </p>
           </motion.div>
