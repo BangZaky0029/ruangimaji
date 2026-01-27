@@ -197,7 +197,12 @@ const Hero: React.FC = () => {
               onClick={togglePlay}
               className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white border-2 border-[#c5a059] text-[#2d2a26] flex items-center justify-center shadow-xl transition-colors"
             >
-              {isPlaying ? <Pause size={20} md:size={24} fill="currentColor" /> : <Play size={20} md:size={24} className="ml-1" fill="currentColor" />}
+              {isPlaying ? (
+                  <Pause className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
+                ) : (
+                  <Play className="w-5 h-5 md:w-6 md:h-6 ml-1" fill="currentColor" />
+                )}
+
             </motion.button>
 
             <motion.div 
