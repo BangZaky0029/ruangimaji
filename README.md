@@ -19,3 +19,4 @@ View your app in AI Studio: https://ai.studio/apps/drive/1w4hlY3KM4RVZCPCNzSgsRF
 3. Run the app:
    `npm run dev`
 "# ruang-imaji" 
+"# ruangimaji" 
