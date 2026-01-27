@@ -1,12 +1,13 @@
-
+//C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\PackageSection.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Send, Zap } from 'lucide-react';
-import { PACKAGES } from '../constants';
-import type {Package} from '../constants'
+import { usePackages } from '../hooks/useSupabaseData';
 
 const PackageSection: React.FC = () => {
-  const handleBooking = (pkg: Package | 'Enterprise') => {
+  const { packages, loading } = usePackages();
+  
+  const handleBooking = (pkg: typeof packages[0] | 'Enterprise') => {
     const phoneNumber = "62895428433006";
     let message = "";
 
@@ -25,6 +26,16 @@ const PackageSection: React.FC = () => {
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  if (loading) {
+    return (
+      <section id="packages" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12 relative z-10">
+          <div className="text-center text-[#c5a059]/40 animate-pulse">Loading packages...</div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="packages" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#c5a059]/5 blur-[120px] rounded-full -mr-48 -mt-48" />
@@ -41,7 +52,7 @@ const PackageSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-          {PACKAGES.map((pkg, idx) => (
+          {packages.map((pkg, idx) => (
             <motion.div
               key={pkg.name}
               initial={{ opacity: 0, y: 30 }}

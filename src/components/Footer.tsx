@@ -1,14 +1,24 @@
+// C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\Footer.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Twitter, Mail, Send, ArrowUp, Phone, MapPin } from 'lucide-react';
-import { NAV_LINKS, CATEGORIES } from '../constants';
+import { useCategories } from '../hooks/useSupabaseData';
 import logo from "../assets/image/imaji_logo_1.png";
 
 interface FooterProps {
   onLinkClick?: () => void;
 }
 
+const NAV_LINKS = [
+  { label: 'Home', href: '#home' },
+  { label: 'Work', href: '#work' },
+  { label: 'Packages', href: '#packages' },
+  { label: 'Contact', href: '#contact' }
+];
+
 const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
+  const { categories } = useCategories();
+  
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -90,7 +100,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
           <div className="space-y-8">
             <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-[#2d2a26]">Expertise</h4>
             <ul className="grid grid-cols-1 gap-4">
-              {CATEGORIES.slice(0, 6).map((cat) => (
+              {categories.slice(0, 6).map((cat) => (
                 <li key={cat}>
                   <span className="text-sm text-[#2d2a26]/40 hover:text-[#2d2a26] cursor-default transition-all flex items-center gap-3">
                     <span className="w-1 h-1 rounded-full bg-[#c5a059]"></span>

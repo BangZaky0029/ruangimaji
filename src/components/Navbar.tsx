@@ -1,16 +1,21 @@
-
 //C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\Navbar.tsx
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { NAV_LINKS } from '../constants';
 import logo from "../assets/image/imaji_logo_1.png";
 
 interface NavbarProps {
   onLinkClick?: () => void;
   onLogoClick?: () => void;
 }
+
+const NAV_LINKS = [
+  { label: 'Home', href: '#home' },
+  { label: 'Work', href: '#work' },
+  { label: 'Packages', href: '#packages' },
+  { label: 'Contact', href: '#contact' }
+];
 
 const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);

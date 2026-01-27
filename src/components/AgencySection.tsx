@@ -1,34 +1,15 @@
+// C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\AgencySection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type {PanInfo} from 'framer-motion';
+import type { PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Sparkles, Globe, Award, Users } from 'lucide-react';
-
-const TEAM_MEMBERS = [
-  { 
-    id: 'member-1', 
-    name: "Alex Rivers",
-    role: "Creative Strategist",
-    url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800", 
-    label: "VISIONARY" 
-  },
-  { 
-    id: 'member-2', 
-    name: "Julian Thorne",
-    role: "Creative Director",
-    url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", 
-    label: "PRECISION" 
-  },
-  { 
-    id: 'member-3', 
-    name: "Sophia Chen",
-    role: "Art Lead",
-    url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800", 
-    label: "CREATIVE" 
-  }
-];
+import { useTeamMembers } from '../hooks/useSupabaseData';
 
 const AgencySection: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(1);
+  
+  // Fetch team members from Supabase
+  const { teamMembers, loading, error } = useTeamMembers();
 
   const stats = [
     { label: 'Global Projects', value: '150+', icon: <Globe size={18} /> },
@@ -37,17 +18,59 @@ const AgencySection: React.FC = () => {
   ];
 
   const nextMember = () => {
-    setActiveIdx((prev) => (prev + 1) % TEAM_MEMBERS.length);
+    if (teamMembers.length === 0) return;
+    setActiveIdx((prev) => (prev + 1) % teamMembers.length);
   };
 
   const prevMember = () => {
-    setActiveIdx((prev) => (prev - 1 + TEAM_MEMBERS.length) % TEAM_MEMBERS.length);
+    if (teamMembers.length === 0) return;
+    setActiveIdx((prev) => (prev - 1 + teamMembers.length) % teamMembers.length);
   };
 
   const handleDragEnd = (_event: unknown, info: PanInfo) => {
     if (info.offset.x > 50) prevMember();
     else if (info.offset.x < -50) nextMember();
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin" />
+          <p className="text-[#2d2a26]/60 text-sm tracking-wider">Loading team...</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Error loading team members</p>
+          <p className="text-[#2d2a26]/60 text-sm">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state
+  if (teamMembers.length === 0) {
+    return (
+      <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden">
+        <div className="container mx-auto px-6 md:px-12">
+          <div className="text-center">
+            <p className="text-[#2d2a26]/60 text-sm tracking-wider">No team members found</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Ensure activeIdx is within bounds after data loads
+  const safeActiveIdx = Math.min(activeIdx, teamMembers.length - 1);
 
   return (
     <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden">
@@ -104,14 +127,18 @@ const AgencySection: React.FC = () => {
             <div className="text-center mb-8 md:mb-12">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={TEAM_MEMBERS[activeIdx].id}
+                  key={teamMembers[safeActiveIdx].id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-2"
                 >
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#2d2a26]">{TEAM_MEMBERS[activeIdx].name}</h3>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059]">{TEAM_MEMBERS[activeIdx].role}</p>
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#2d2a26]">
+                    {teamMembers[safeActiveIdx].name}
+                  </h3>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#c5a059]">
+                    {teamMembers[safeActiveIdx].role}
+                  </p>
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -123,13 +150,13 @@ const AgencySection: React.FC = () => {
                 onDragEnd={handleDragEnd}
                 className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing transform-gpu"
               >
-                {TEAM_MEMBERS.map((member, index) => {
-                  let offset = index - activeIdx;
+                {teamMembers.map((member, index) => {
+                  let offset = index - safeActiveIdx;
                   
-                  if (offset > 1) offset -= 3;
-                  if (offset < -1) offset += 3;
+                  if (offset > 1) offset -= teamMembers.length;
+                  if (offset < -1) offset += teamMembers.length;
 
-                  const isCenter = index === activeIdx;
+                  const isCenter = index === safeActiveIdx;
                   const absOffset = Math.abs(offset);
 
                   return (
@@ -154,7 +181,7 @@ const AgencySection: React.FC = () => {
                       }}
                     >
                       <motion.img 
-                        src={member.url} 
+                        src={member.image_url} 
                         alt={member.name} 
                         animate={{ filter: isCenter ? 'grayscale(0%)' : 'grayscale(100%)' }}
                         className="w-full h-full object-cover select-none pointer-events-none"
@@ -176,17 +203,18 @@ const AgencySection: React.FC = () => {
                 whileHover={{ scale: 1.1, x: -5 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={prevMember}
-                className="w-14 h-14 rounded-full bg-white border border-[#2d2a26]/5 text-[#c5a059] flex items-center justify-center shadow-xl hover:bg-[#c5a059] hover:text-white transition-colors"
+                disabled={teamMembers.length <= 1}
+                className="w-14 h-14 rounded-full bg-white border border-[#2d2a26]/5 text-[#c5a059] flex items-center justify-center shadow-xl hover:bg-[#c5a059] hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={24} />
               </motion.button>
 
               <div className="flex gap-2.5">
-                {TEAM_MEMBERS.map((_, i) => (
+                {teamMembers.map((_, i) => (
                   <button 
                     key={i} 
                     onClick={() => setActiveIdx(i)}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${activeIdx === i ? 'w-10 bg-[#c5a059]' : 'w-2 bg-[#2d2a26]/10'}`}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${safeActiveIdx === i ? 'w-10 bg-[#c5a059]' : 'w-2 bg-[#2d2a26]/10'}`}
                   />
                 ))}
               </div>
@@ -195,7 +223,8 @@ const AgencySection: React.FC = () => {
                 whileHover={{ scale: 1.1, x: 5 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={nextMember}
-                className="w-14 h-14 rounded-full bg-[#c5a059] text-white flex items-center justify-center shadow-xl hover:bg-[#b38d47] transition-colors"
+                disabled={teamMembers.length <= 1}
+                className="w-14 h-14 rounded-full bg-[#c5a059] text-white flex items-center justify-center shadow-xl hover:bg-[#b38d47] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={24} />
               </motion.button>

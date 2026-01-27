@@ -1,11 +1,16 @@
+// C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\ContactSection.tsx
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Loader2, ChevronDown } from 'lucide-react';
-import { PACKAGES, CATEGORIES } from '../constants';
+import { usePackages, useCategories } from '../hooks/useSupabaseData';
 
 const ContactSection: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
+  
+  const { packages, loading: packagesLoading } = usePackages();
+  const { categories, loading: categoriesLoading } = useCategories();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +51,8 @@ const ContactSection: React.FC = () => {
     const message = `Halo RUANG IMAJI, saya *${formData.name}*.\n\nSaya ingin reservasi untuk:\n- *Paket*: ${formData.selectedPackage}\n- *Kategori*: ${formData.category}\n- *Alamat*: ${formData.address}\n${formData.locationLink ? `- *Link Lokasi*: ${formData.locationLink}` : ''}\n\nMohon informasi lebih lanjut. Terima kasih!`;
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
+
+  const loading = packagesLoading || categoriesLoading;
 
   return (
     <section id="contact" className="py-32 md:py-48 bg-white relative overflow-hidden">
@@ -131,78 +138,82 @@ const ContactSection: React.FC = () => {
                   transition={{ duration: 0.5 }}
                   className="overflow-hidden"
                 >
-                  <form 
-                    onSubmit={handleSubmit} 
-                    className="p-8 md:p-14 rounded-[2.5rem] bg-[#fbfaf8] border border-[#c5a059]/10 shadow-2xl shadow-[#c5a059]/5 space-y-8"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Nama Lengkap</label>
-                        <input 
-                          required 
-                          type="text" 
-                          value={formData.name} 
-                          onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                          placeholder="Contoh: Budi Santoso" 
-                          className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] transition-all text-sm" 
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Paket</label>
-                        <select 
-                          required 
-                          value={formData.selectedPackage} 
-                          onChange={(e) => setFormData({...formData, selectedPackage: e.target.value})} 
-                          className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
-                        >
-                          <option value="">Pilih Paket</option>
-                          {PACKAGES.map(pkg => (<option key={pkg.name} value={pkg.name}>{pkg.name}</option>))}
-                          <option value="Custom">Custom Production</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Kategori</label>
-                        <select 
-                          required 
-                          value={formData.category} 
-                          onChange={(e) => setFormData({...formData, category: e.target.value})} 
-                          className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
-                        >
-                          <option value="">Pilih Kategori</option>
-                          {CATEGORIES.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
-                        </select>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Alamat</label>
-                        <div className="flex gap-2">
+                  {loading ? (
+                    <div className="p-14 text-center text-[#c5a059]/40">Loading form...</div>
+                  ) : (
+                    <form 
+                      onSubmit={handleSubmit} 
+                      className="p-8 md:p-14 rounded-[2.5rem] bg-[#fbfaf8] border border-[#c5a059]/10 shadow-2xl shadow-[#c5a059]/5 space-y-8"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Nama Lengkap</label>
                           <input 
                             required 
                             type="text" 
-                            value={formData.address} 
-                            onChange={(e) => setFormData({...formData, address: e.target.value})} 
-                            placeholder="Alamat lengkap" 
-                            className="flex-grow bg-[#f3eee5] border-none rounded-xl px-4 py-3 text-sm" 
+                            value={formData.name} 
+                            onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                            placeholder="Contoh: Budi Santoso" 
+                            className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] transition-all text-sm" 
                           />
-                          <button 
-                            type="button" 
-                            onClick={handleGetLocation} 
-                            className="w-12 h-12 rounded-xl bg-[#f3eee5] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all shrink-0"
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Paket</label>
+                          <select 
+                            required 
+                            value={formData.selectedPackage} 
+                            onChange={(e) => setFormData({...formData, selectedPackage: e.target.value})} 
+                            className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
                           >
-                            {isLocating ? <Loader2 className="animate-spin" size={18} /> : <MapPin size={18} />}
-                          </button>
+                            <option value="">Pilih Paket</option>
+                            {packages.map(pkg => (<option key={pkg.name} value={pkg.name}>{pkg.name}</option>))}
+                            <option value="Custom">Custom Production</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Kategori</label>
+                          <select 
+                            required 
+                            value={formData.category} 
+                            onChange={(e) => setFormData({...formData, category: e.target.value})} 
+                            className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
+                          >
+                            <option value="">Pilih Kategori</option>
+                            {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Alamat</label>
+                          <div className="flex gap-2">
+                            <input 
+                              required 
+                              type="text" 
+                              value={formData.address} 
+                              onChange={(e) => setFormData({...formData, address: e.target.value})} 
+                              placeholder="Alamat lengkap" 
+                              className="flex-grow bg-[#f3eee5] border-none rounded-xl px-4 py-3 text-sm" 
+                            />
+                            <button 
+                              type="button" 
+                              onClick={handleGetLocation} 
+                              className="w-12 h-12 rounded-xl bg-[#f3eee5] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all shrink-0"
+                            >
+                              {isLocating ? <Loader2 className="animate-spin" size={18} /> : <MapPin size={18} />}
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <motion.button 
-                      type="submit" 
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-6 bg-[#c5a059] text-white font-bold uppercase tracking-[0.3em] rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#c5a059]/20 hover:bg-[#b38d47]"
-                    >
-                      Send to WhatsApp <Send size={18} />
-                    </motion.button>
-                  </form>
+                      
+                      <motion.button 
+                        type="submit" 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-6 bg-[#c5a059] text-white font-bold uppercase tracking-[0.3em] rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#c5a059]/20 hover:bg-[#b38d47]"
+                      >
+                        Send to WhatsApp <Send size={18} />
+                      </motion.button>
+                    </form>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
