@@ -1,15 +1,19 @@
+
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\ContactSection.tsx
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Loader2, ChevronDown } from 'lucide-react';
-import { usePackages, useCategories } from '../hooks/useSupabaseData';
+// Fix: Import usePackages from its specific hook file and useCategories from Supabase data hook
+import { useCategories } from '../hooks/useSupabaseData';
+import { usePackages } from '../hooks/usePackages';
 
 const ContactSection: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
   
-  const { packages, loading: packagesLoading } = usePackages();
+  // Fix: usePackages hook from usePackages.ts returns 'services' which contains nested packages
+  const { services, loading: packagesLoading } = usePackages();
   const { categories, loading: categoriesLoading } = useCategories();
   
   const [formData, setFormData] = useState({
@@ -19,6 +23,9 @@ const ContactSection: React.FC = () => {
     address: '',
     locationLink: ''
   });
+
+  // Flatten services into a single packages array for the dropdown list
+  const packages = (services || []).flatMap(s => s.packages || []);
 
   const handleGetLocation = () => {
     setIsLocating(true);

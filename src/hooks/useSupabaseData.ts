@@ -112,11 +112,11 @@ export const useCategories = () => {
       try {
         const { data, error } = await supabase
           .from('categories')
-          .select('name')
+          .select('name, slug')
           .order('name', { ascending: true });
 
         if (error) throw error;
-        setCategories(data?.map(c => c.name) || []);
+        setCategories(data?.map(c => c.slug) || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch categories');
       } finally {

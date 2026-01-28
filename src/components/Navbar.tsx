@@ -8,16 +8,18 @@ import logo from "../assets/image/imaji_logo_1.png";
 interface NavbarProps {
   onLinkClick?: () => void;
   onLogoClick?: () => void;
+  onPortfolioClick?: () => void;
 }
 
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
   { label: 'Work', href: '#work' },
+  { label: 'Portfolio', href: '#portfolio' },
   { label: 'Packages', href: '#packages' },
   { label: 'Contact', href: '#contact' }
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick, onPortfolioClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -38,10 +40,18 @@ const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick }) => {
     }
   }, [isMobileMenuOpen]);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('#')) {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { label: string, href: string }) => {
+    // Intercept Portfolio click to open Gallery instead of scrolling
+    if (link.label === 'Portfolio' && onPortfolioClick) {
       e.preventDefault();
-      const targetId = href.replace('#', '');
+      onPortfolioClick();
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
+    if (link.href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = link.href.replace('#', '');
       const elem = document.getElementById(targetId);
       if (elem) {
         elem.scrollIntoView({ behavior: 'smooth' });
@@ -85,7 +95,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick }) => {
               <motion.a 
                 key={link.label} 
                 href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
+                onClick={(e) => handleNavClick(e, link)}
                 initial={{ opacity: 0, y: -10 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 transition={{ delay: idx * 0.1 }} 
@@ -154,7 +164,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLinkClick, onLogoClick }) => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + (idx * 0.05) }}
-                    onClick={(e) => handleNavClick(e, link.href)} 
+                    onClick={(e) => handleNavClick(e, link)} 
                     className="text-5xl font-serif font-bold text-[#2d2a26] hover:text-[#c5a059] transition-colors leading-tight"
                   >
                     {link.label}

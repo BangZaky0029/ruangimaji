@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Play, X, Filter, Camera, Film, ChevronRight } from 'lucide-react';
 import { useProjects, useCategories } from '../hooks/useSupabaseData';
+import type { Project } from '../hooks/useSupabaseData';
 import { isYouTubeUrl, getYouTubeEmbedUrl } from '../lib/videoUtils';
 
 interface CategoryGalleryProps {
@@ -14,6 +15,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
   const [activeType, setActiveType] = useState<'Photo' | 'Video'>(type);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<Project | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   // Fetch projects from Supabase
@@ -30,15 +32,15 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
 
   const loading = projectsLoading || categoriesLoading;
 
-  // Prevent scroll when filter menu is open on mobile
+  // Prevent scroll when filter menu or photo modal is open
   useEffect(() => {
-    if (isFilterOpen) {
+    if (isFilterOpen || selectedPhoto) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [isFilterOpen]);
+  }, [isFilterOpen, selectedPhoto]);
 
   if (loading) {
     return (
@@ -70,7 +72,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
         </motion.button>
       </div>
 
-      {/* Full-Screen Filter Overlay for Mobile - Glossy Transparent */}
+      {/* Full-Screen Filter Overlay for Mobile */}
       <AnimatePresence>
         {isFilterOpen && (
           <>
@@ -99,7 +101,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
               </div>
 
               <div className="space-y-12">
-                {/* Type Switcher in Mobile Filter */}
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-6 ml-1">Modality</p>
                   <div className="grid grid-cols-2 gap-4">
@@ -118,7 +119,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                   </div>
                 </div>
 
-                {/* Categories in Mobile Filter */}
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-6 ml-1">Collections</p>
                   <div className="flex flex-col gap-3">
@@ -142,10 +142,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                   </div>
                 </div>
               </div>
-
-              <div className="mt-20 pt-10 border-t border-white/5 opacity-40">
-                <p className="text-[8px] font-bold uppercase tracking-[0.4em] text-center">RUANG IMAJI / Jakarta</p>
-              </div>
             </motion.div>
           </>
         )}
@@ -165,9 +161,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
             </h2>
           </div>
 
-          {/* Desktop Controls (Type Switcher + Categories) */}
           <div className="hidden md:flex flex-col items-end gap-6">
-            {/* Desktop Type Switcher */}
             <div className="flex bg-[#f3eee5] p-1.5 rounded-full border border-[#2d2a26]/5">
                <button 
                  onClick={() => { setActiveType('Photo'); setSelectedCategory(null); }}
@@ -183,7 +177,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                </button>
             </div>
 
-            {/* Desktop Categories */}
             <div className="flex flex-wrap justify-end gap-3">
                <button 
                  onClick={() => setSelectedCategory(null)} 
@@ -258,7 +251,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
                         className="w-full h-full cursor-pointer relative" 
-                        onClick={() => activeType === 'Video' && setPlayingVideoId(item.id)}
+                        onClick={() => activeType === 'Video' ? setPlayingVideoId(item.id) : setSelectedPhoto(item)}
                       >
                         <img 
                           src={item.image_url} 
@@ -296,6 +289,76 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
           </div>
         )}
       </div>
+
+      {/* Photo Details Lightbox */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 overflow-y-auto"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
+              className={`relative w-full ${selectedPhoto.aspect_ratio === 'portrait' ? 'max-w-[420px]' : 'max-w-[1000px]'} bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/40 flex flex-col`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Image Header - Aspect ratio aware */}
+              <div className="relative w-full bg-black group overflow-hidden">
+                <img 
+                  src={selectedPhoto.image_url} 
+                  alt={selectedPhoto.title} 
+                  className={`w-full h-auto max-h-[70vh] object-contain transition-transform duration-700 group-hover:scale-105`}
+                />
+                
+                {/* Close button - Integrated into image frame */}
+                <button 
+                  onClick={() => setSelectedPhoto(null)} 
+                  className="absolute top-6 right-6 w-12 h-12 rounded-full bg-black/30 hover:bg-[#c5a059] text-white flex items-center justify-center backdrop-blur-xl border border-white/20 transition-all shadow-xl z-50"
+                >
+                  <X size={24} />
+                </button>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+              </div>
+
+              {/* Info Area */}
+              <div className="p-8 md:p-12 bg-white">
+                <div className="flex flex-col gap-6">
+                  <div className="space-y-3">
+                    <span className="text-[10px] font-bold text-[#c5a059] uppercase tracking-[0.4em] block">{selectedPhoto.category}</span>
+                    <h3 className="text-3xl md:text-5xl font-serif font-bold text-[#2d2a26] leading-none tracking-tight">
+                      {selectedPhoto.title}
+                    </h3>
+                  </div>
+                  
+                  <div className="h-[1px] w-full bg-[#2d2a26]/5" />
+                  
+                  <div className="text-[#2d2a26]/60 text-sm md:text-base font-light leading-relaxed">
+                    {selectedPhoto.description || "Sebuah karya visual yang menangkap esensi dari momen dan cerita di balik lensa. Bagian dari koleksi portofolio eksklusif Ruang Imaji."}
+                  </div>
+
+                  <div className="flex items-center gap-6 pt-4">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-[#2d2a26]/20">Client</span>
+                      <span className="text-xs font-bold text-[#2d2a26]/80">Portfolio Selection</span>
+                    </div>
+                    <div className="w-[1px] h-8 bg-[#2d2a26]/5" />
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-[#2d2a26]/20">Year</span>
+                      <span className="text-xs font-bold text-[#2d2a26]/80">2024</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

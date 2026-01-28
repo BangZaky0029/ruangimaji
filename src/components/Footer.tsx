@@ -7,26 +7,35 @@ import logo from "../assets/image/imaji_logo_1.png";
 
 interface FooterProps {
   onLinkClick?: () => void;
+  onPortfolioClick?: () => void;
 }
 
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
   { label: 'Work', href: '#work' },
+  { label: 'Portfolio', href: '#portfolio' },
   { label: 'Packages', href: '#packages' },
   { label: 'Contact', href: '#contact' }
 ];
 
-const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
+const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
   const { categories } = useCategories();
   
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('#')) {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { label: string, href: string }) => {
+    // Intercept Portfolio click to open Gallery instead of scrolling
+    if (link.label === 'Portfolio' && onPortfolioClick) {
       e.preventDefault();
-      const targetId = href.replace('#', '');
+      onPortfolioClick();
+      return;
+    }
+
+    if (link.href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = link.href.replace('#', '');
       const elem = document.getElementById(targetId);
       if (elem) {
         elem.scrollIntoView({ behavior: 'smooth' });
@@ -86,7 +95,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
                 <li key={link.label}>
                   <a 
                     href={link.href} 
-                    onClick={(e) => handleNavClick(e, link.href)}
+                    onClick={(e) => handleNavClick(e, link)}
                     className="text-sm text-[#2d2a26]/40 hover:text-[#c5a059] transition-all flex items-center gap-2 group"
                   >
                     <span className="w-0 h-[1px] bg-[#c5a059] group-hover:w-4 transition-all"></span>

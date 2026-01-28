@@ -1,4 +1,4 @@
-
+//C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\pages\Home.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
@@ -35,6 +35,7 @@ const Home: React.FC = () => {
       <Navbar 
         onLogoClick={() => setActiveGallery(null)} 
         onLinkClick={resetGalleryAndNavigate}
+        onPortfolioClick={() => setActiveGallery('Photo')}
       />
       
       <AnimatePresence mode="wait">
@@ -139,7 +140,10 @@ const Home: React.FC = () => {
                   </div>
               </section>
             </main>
-            <Footer onLinkClick={resetGalleryAndNavigate} />
+            <Footer 
+              onLinkClick={resetGalleryAndNavigate} 
+              onPortfolioClick={() => setActiveGallery('Photo')}
+            />
           </motion.div>
         ) : (
           <CategoryGallery 
