@@ -8,8 +8,8 @@ import {
   Film, 
   Play, 
   X,
-  ChevronLeft,
-  ChevronRight,
+  ChevronUp,
+  ChevronDown,
   LayoutGrid
 } from 'lucide-react';
 import { useProjects } from '../hooks/useSupabaseData';
@@ -41,6 +41,8 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
   const scale = activeIndex === index ? 1 : 0.75 - Math.abs(relativeIndex) * 0.05;
   const isCenter = activeIndex === index;
 
+
+
   return (
     <motion.div
       initial={false}
@@ -55,7 +57,7 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
       onClick={onClick}
       className={`absolute cursor-pointer flex flex-col items-center pointer-events-auto ${side === 'left' ? 'left-0' : 'right-0'}`}
     >
-      <div className={`relative group overflow-hidden rounded-2xl transition-all duration-500 border-2 ${isCenter ? 'border-[#c5a059] shadow-2xl shadow-[#c5a059]/20 w-[280px] md:w-[350px]' : 'border-[#2d2a26]/5 w-[160px] md:w-[200px]'} aspect-[3/4] md:aspect-[4/5] bg-black`}>
+      <div className={`relative group overflow-hidden rounded-2xl transition-all duration-500 border-2 ${isCenter ? 'border-[#c5a059] shadow-2xl shadow-[#c5a059]/20 w-[240px] md:w-[320px]' : 'border-[#2d2a26]/5 w-[160px] md:w-[200px]'} aspect-square md:aspect-[4/5] bg-black`}>
         <AnimatePresence mode="wait">
           {isPlaying && item.video_url ? (
             <motion.div 
@@ -63,22 +65,22 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black flex items-center justify-center"
+              className="absolute inset-0 z-50 bg-black"
             >
               {isYouTubeUrl(item.video_url) ? (
                 <iframe 
                   src={getYouTubeEmbedUrl(item.video_url, { autoplay: 1 })}
-                  className="w-full h-full absolute inset-0"
+                  className="w-full h-full"
                   allow="autoplay; fullscreen"
                 />
               ) : (
-                <video src={item.video_url} className="w-full h-full object-contain" autoPlay controls playsInline />
+                <video src={item.video_url} className="w-full h-full object-cover" autoPlay controls playsInline />
               )}
               <button 
                 onClick={(e) => { e.stopPropagation(); onClose(); }}
-                className="absolute top-4 right-4 z-[60] w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-[#c5a059] transition-colors border border-white/20"
+                className="absolute top-4 right-4 z-[60] w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c5a059] transition-colors"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </motion.div>
           ) : (
@@ -125,6 +127,25 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   const photos = portfolioData.Photo || [];
   const videos = portfolioData.Video || [];
   const currentBackground = viewMode === 'Video' ? videos[activeVideoIdx]?.image_url : photos[activePhotoIdx]?.image_url;
+  const handlePrev = () => {
+    setPlayingVideoId(null);
+
+    if (viewMode === 'Video') {
+      setActiveVideoIdx(prev => Math.max(0, prev - 1));
+    } else {
+      setActivePhotoIdx(prev => Math.max(0, prev - 1));
+    }
+  };
+
+  const handleNext = () => {
+    setPlayingVideoId(null);
+
+    if (viewMode === 'Video') {
+      setActiveVideoIdx(prev => Math.min(videos.length - 1, prev + 1));
+    } else {
+      setActivePhotoIdx(prev => Math.min(photos.length - 1, prev + 1));
+    }
+  };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
@@ -155,9 +176,18 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
       <div className="container mx-auto px-6 md:px-24 relative z-10 flex h-full items-center justify-center pointer-events-none">
         <div className="absolute inset-y-0 left-6 right-6 md:left-12 md:right-12 z-50 flex items-center pointer-events-none">
           <motion.div layout className={`pointer-events-auto flex flex-col items-center gap-14 bg-white/20 backdrop-blur-3xl py-12 px-5 rounded-full border border-white/30 shadow-2xl ${viewMode === 'Photo' ? 'mr-auto' : 'ml-auto'}`}>
-            <motion.button onClick={() => { setViewMode('Photo'); setPlayingVideoId(null); }} className={`${viewMode === 'Photo' ? 'text-[#c5a059]' : 'text-[#2d2a26]/40 hover:text-[#2d2a26]'}`}><Camera size={24} /><span className="text-[6px] font-bold mt-1 uppercase">Photo</span></motion.button>
-            <motion.button onClick={() => onSeeAll(viewMode)} className="text-[#2d2a26]/40 hover:text-[#c5a059]"><LayoutGrid size={24} /><span className="text-[6px] font-bold mt-1 uppercase">Browse</span></motion.button>
-            <motion.button onClick={() => { setViewMode('Video'); setPlayingVideoId(null); }} className={`${viewMode === 'Video' ? 'text-[#c5a059]' : 'text-[#2d2a26]/40 hover:text-[#2d2a26]'}`}><Film size={24} /><span className="text-[6px] font-bold mt-1 uppercase">Video</span></motion.button>
+            <motion.button onClick={() => { setViewMode('Photo'); setPlayingVideoId(null); }} className={`${viewMode === 'Photo' ? 'text-[#c5a059]' : 'text-[#2d2a26]/40 hover:text-[#2d2a26]'}`}>
+              <Camera size={24} />
+              <span className="text-[6px] font-bold mt-1 uppercase">Photo</span>
+            </motion.button>
+            <motion.button onClick={() => onSeeAll(viewMode)} className="text-[#2d2a26]/40 hover:text-[#c5a059]">
+              <LayoutGrid size={24} />
+              <span className="text-[6px] font-bold mt-1 uppercase">Browse</span>
+            </motion.button>
+            <motion.button onClick={() => { setViewMode('Video'); setPlayingVideoId(null); }} className={`${viewMode === 'Video' ? 'text-[#c5a059]' : 'text-[#2d2a26]/40 hover:text-[#2d2a26]'}`}>
+              <Film size={24} />
+              <span className="text-[6px] font-bold mt-1 uppercase">Video</span>
+            </motion.button>
           </motion.div>
         </div>
 
@@ -171,14 +201,31 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
         </motion.div>
       </div>
 
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-12 z-40 bg-white/20 backdrop-blur-2xl px-10 py-4 rounded-full border border-white/30 shadow-2xl">
+      {/* Navigation Control Pill with Vertical Arrows */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 z-40 bg-white/20 backdrop-blur-2xl px-8 py-3 rounded-full border border-white/30 shadow-2xl">
          <div className="flex items-center gap-4 border-r border-[#c5a059]/30 pr-8 text-[#2d2a26]">
-            <span className="text-sm md:text-lg font-serif italic text-[#c5a059] font-bold whitespace-nowrap">{viewMode === 'Video' ? videos[activeVideoIdx]?.title : photos[activePhotoIdx]?.title}</span>
+            <span className="text-sm md:text-lg font-serif italic text-[#c5a059] font-bold whitespace-nowrap">
+              {viewMode === 'Video' ? videos[activeVideoIdx]?.title : photos[activePhotoIdx]?.title}
+            </span>
          </div>
-         <div className="flex gap-4">
-            <button onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.max(0, p - 1)) : setActivePhotoIdx(p => Math.max(0, p - 1)); }} className="w-10 h-10 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white"><ChevronLeft size={16} /></button>
-            <button onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.min(videos.length - 1, p + 1)) : setActivePhotoIdx(p => Math.min(photos.length - 1, p + 1)); }} className="w-10 h-10 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white"><ChevronRight size={16} /></button>
-         </div>
+         <div className="flex flex-col gap-1.5 py-1">
+            <button
+              onClick={handlePrev}
+              className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
+              title="Previous"
+            >
+              <ChevronUp size={14} />
+            </button>
+
+            <button
+              onClick={handleNext}
+              className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
+              title="Next"
+            >
+              <ChevronDown size={14} />
+            </button>
+          </div>
+
       </div>
     </section>
   );
