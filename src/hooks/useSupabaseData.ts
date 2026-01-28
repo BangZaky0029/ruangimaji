@@ -1,3 +1,4 @@
+
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\hooks\useSupabaseData.ts
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
@@ -32,6 +33,7 @@ export interface Package {
   id: string;
   name: string;
   price: string;
+  discount: string;
   color: string;
   created_at: string;
   features?: PackageFeature[];
@@ -202,6 +204,7 @@ export const usePackages = () => {
   const formattedPackages = packages.map(pkg => ({
     name: pkg.name,
     price: pkg.price,
+    discount: pkg.discount,
     color: pkg.color || 'border-[#c5a059]/10',
     deliverables: {
       photo: pkg.features?.filter(f => f.type === 'photo').map(f => f.feature) || [],
