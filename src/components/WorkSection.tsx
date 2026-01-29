@@ -143,7 +143,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
     return (
       <section id="work" className="relative h-screen bg-[#fbfaf8] flex items-center justify-center">
         <motion.img 
-          src="public/imajiLogo.svg" 
+          src="/imajiLogo.svg" 
           className="w-20 h-20" 
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 

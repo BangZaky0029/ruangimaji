@@ -37,7 +37,7 @@ const AgencySection: React.FC = () => {
     return (
       <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center">
         <motion.img 
-          src="public/imajiLogo.svg" 
+          src="/imajiLogo.svg" 
           className="w-20 h-20" 
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
