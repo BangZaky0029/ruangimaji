@@ -36,10 +36,12 @@ const AgencySection: React.FC = () => {
   if (loading) {
     return (
       <section id="agency" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin" />
-          <p className="text-[#2d2a26]/60 text-sm tracking-wider">Loading team...</p>
-        </div>
+        <motion.img 
+          src="public/imajiLogo.svg" 
+          className="w-20 h-20" 
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+        />
       </section>
     );
   }

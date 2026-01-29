@@ -1,4 +1,3 @@
-
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\ContactSection.tsx
 
 import React, { useState } from 'react';
@@ -146,7 +145,14 @@ const ContactSection: React.FC = () => {
                   className="overflow-hidden"
                 >
                   {loading ? (
-                    <div className="p-14 text-center text-[#c5a059]/40">Loading form...</div>
+                    <div className="p-14 flex items-center justify-center">
+                      <motion.img 
+                        src="public/imajiLogo.svg" 
+                        className="w-12 h-12" 
+                        animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+                      />
+                    </div>
                   ) : (
                     <form 
                       onSubmit={handleSubmit} 

@@ -1,4 +1,3 @@
-
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\WorkSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,8 +39,6 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
   const opacity = Math.max(0, 1 - Math.abs(relativeIndex) * 0.4);
   const scale = activeIndex === index ? 1 : 0.75 - Math.abs(relativeIndex) * 0.05;
   const isCenter = activeIndex === index;
-
-
 
   return (
     <motion.div
@@ -127,25 +124,6 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   const photos = portfolioData.Photo || [];
   const videos = portfolioData.Video || [];
   const currentBackground = viewMode === 'Video' ? videos[activeVideoIdx]?.image_url : photos[activePhotoIdx]?.image_url;
-  const handlePrev = () => {
-    setPlayingVideoId(null);
-
-    if (viewMode === 'Video') {
-      setActiveVideoIdx(prev => Math.max(0, prev - 1));
-    } else {
-      setActivePhotoIdx(prev => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleNext = () => {
-    setPlayingVideoId(null);
-
-    if (viewMode === 'Video') {
-      setActiveVideoIdx(prev => Math.min(videos.length - 1, prev + 1));
-    } else {
-      setActivePhotoIdx(prev => Math.min(photos.length - 1, prev + 1));
-    }
-  };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
@@ -162,7 +140,16 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   };
 
   if (loading || (!photos.length && !videos.length)) {
-    return <section id="work" className="relative h-screen bg-[#fbfaf8] flex items-center justify-center">Loading...</section>;
+    return (
+      <section id="work" className="relative h-screen bg-[#fbfaf8] flex items-center justify-center">
+        <motion.img 
+          src="public/imajiLogo.svg" 
+          className="w-20 h-20" 
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+        />
+      </section>
+    );
   }
 
   return (
@@ -209,23 +196,21 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
             </span>
          </div>
          <div className="flex flex-col gap-1.5 py-1">
-            <button
-              onClick={handlePrev}
+            <button 
+              onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.max(0, p - 1)) : setActivePhotoIdx(p => Math.max(0, p - 1)); }} 
               className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
               title="Previous"
             >
               <ChevronUp size={14} />
             </button>
-
-            <button
-              onClick={handleNext}
+            <button 
+              onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.min(videos.length - 1, p + 1)) : setActivePhotoIdx(p => Math.min(photos.length - 1, p + 1)); }} 
               className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
               title="Next"
             >
               <ChevronDown size={14} />
             </button>
-          </div>
-
+         </div>
       </div>
     </section>
   );

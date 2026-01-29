@@ -51,7 +51,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
   );
 
   const socials = [
-    { id: 'instagram', icon: <Instagram size={18} />, href: '#' },
+    { id: 'instagram', icon: <Instagram size={18} />, href: 'https://www.instagram.com/tanyaajieaja/' },
     { id: 'tiktok', icon: <TikTokIcon />, href: '#' },
     { id: 'twitter', icon: <Twitter size={18} />, href: '#' },
     { id: 'telegram', icon: <Send size={18} className="rotate-[-20deg]" />, href: '#' },
@@ -79,6 +79,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
                 <motion.a
                   key={social.id}
                   href={social.href}
+                  target="_blank"
                   whileHover={{ y: -3, backgroundColor: '#c5a059', color: '#fff' }}
                   className="w-10 h-10 rounded-full border border-[#c5a059]/20 flex items-center justify-center text-[#c5a059] transition-all"
                 >

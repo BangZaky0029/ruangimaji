@@ -1,4 +1,3 @@
-
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji-1\src\components\PackageSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -146,10 +145,12 @@ const PackageSection: React.FC = () => {
   if (loading) {
     return (
       <section id="packages" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center min-h-[600px]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin" />
-          <p className="text-[#c5a059] font-bold uppercase tracking-widest text-[10px]">Syncing Pricing Data...</p>
-        </div>
+        <motion.img 
+          src="public/imajiLogo.svg" 
+          className="w-20 h-20" 
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+        />
       </section>
     );
   }

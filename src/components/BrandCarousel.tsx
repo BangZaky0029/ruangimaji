@@ -10,7 +10,12 @@ const BrandCarousel: React.FC = () => {
     return (
       <section className="py-20 bg-[#fbfaf8] overflow-hidden border-b border-[#c5a059]/5">
         <div className="flex flex-col gap-10 items-center justify-center">
-          <div className="text-[#c5a059]/20 animate-pulse">Loading brands...</div>
+          <motion.img 
+            src="public/imajiLogo.svg" 
+            className="w-16 h-16" 
+            animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+          />
         </div>
       </section>
     );

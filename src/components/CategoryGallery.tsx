@@ -1,4 +1,3 @@
-
 //C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\CategoryGallery.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -108,7 +107,12 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
   if (loading) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[160] bg-[#fbfaf8] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin" />
+        <motion.img 
+          src="public/imajiLogo.svg" 
+          className="w-20 h-20" 
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+        />
       </motion.div>
     );
   }
