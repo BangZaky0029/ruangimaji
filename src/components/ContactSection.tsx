@@ -99,6 +99,7 @@ const ContactSection: React.FC = () => {
                 <div>
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40 mb-1">Call Us</h4>
                   <p className="text-xl font-medium text-[#2d2a26]">+62 898 876 1937</p>
+                  <p className="text-xl font-medium text-[#2d2a26]">+62 895 4284 33006</p>
                 </div>
               </div>
 
