@@ -1,9 +1,13 @@
+
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji-1\src\components\PackageSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Send, ChevronRight, Layout, Star } from 'lucide-react';
+import { Check, Send, ChevronRight, Layout, Star, FileText } from 'lucide-react';
 import { usePackages } from '../hooks/usePackages';
 import type { Service, Package } from '../hooks/usePackages';
+import OrderForm from './OrderForm';
+
+const WHATSAPP_NUMBER = "628988761937";
 
 const formatIDR = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
@@ -13,12 +17,8 @@ const formatIDR = (amount: number) => {
   }).format(amount).replace('Rp', 'Rp ');
 };
 
-/**
- * Enhanced dictionary-based "auto-translator" for agency, tech, and photography terms
- */
 const autoTranslateToIndo = (text: string): string => {
   const dictionary: Record<string, string> = {
-    // Branding & Design
     "Design Branding": "Desain Branding",
     "Basic Brand Guidelines": "Panduan Dasar Brand",
     "Feed Template Designs": "Desain Templat Feed",
@@ -28,8 +28,6 @@ const autoTranslateToIndo = (text: string): string => {
     "Instagram Stories / Week": "Instagram Stories / Minggu",
     "Professional Caption Writing": "Penulisan Caption Profesional",
     "Content Scheduling & Posting": "Penjadwalan & Posting Konten",
-    
-    // Basic Tech & Web
     "Website": "Situs Web",
     "Up to": "Hingga",
     "Pages": "Halaman",
@@ -64,14 +62,11 @@ const autoTranslateToIndo = (text: string): string => {
     "6 Months Full Maintenance & Updates": "Pemeliharaan & Pembaruan Penuh 6 Bulan",
     "Complete Training & Documentation": "Pelatihan & Dokumentasi Lengkap",
     "Priority Support & Dedicated Account Manager": "Dukungan Prioritas & Manajer Akun Khusus",
-    
-    // Photography & Wedding specific
     "Lead Photographer": "Fotografer Utama",
     "Assistant Photographers": "Asisten Fotografer",
     "Assistant Photographer": "Asisten Fotografer",
     "Unlimited Session Time": "Waktu Sesi Tanpa Batas",
     "Session Time": "Waktu Sesi",
-    "Unlimited": "Tanpa Batas",
     "Professional Editing": "Editing Profesional",
     "Photo Session": "Sesi Foto",
     "Video Highlights": "Cuplikan Video",
@@ -96,25 +91,21 @@ const autoTranslateToIndo = (text: string): string => {
     "Wooden Box": "Kotak Kayu Exclusive"
   };
 
-  // Try exact match first
   if (dictionary[text]) return dictionary[text];
-
-  // Sorting keys by length descending to ensure longer phrases are replaced first
   const sortedKeys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
-
   let translated = text;
   sortedKeys.forEach((en) => {
     const id = dictionary[en];
     const regex = new RegExp(en, 'gi');
     translated = translated.replace(regex, id);
   });
-
   return translated;
 };
 
 const PackageSection: React.FC = () => {
   const { services, loading } = usePackages();
   const [activeServiceIdx, setActiveServiceIdx] = useState(0);
+  const [isOrderFormOpen, setIsOrderFormOpen] = useState(false);
 
   const activeService = services[activeServiceIdx];
 
@@ -127,30 +118,26 @@ const PackageSection: React.FC = () => {
   };
 
   const handleBooking = (pkg: Package, service: Service) => {
-    const phoneNumber = "62895428433006";
     const discountPrice = formatIDR(pkg.discount_amount);
-    
-    const featuresList = pkg.features
-      .map(f => `- ${f.feature}`)
-      .join('\n');
-    
+    const featuresList = pkg.features.map(f => `- ${f.feature}`).join('\n');
     const message = `Halo Ruang Imaji, saya tertarik untuk booking paket *${pkg.name}* dari layanan *${service.name}*.\n\n` +
                     `*Harga Promo:* ${discountPrice}\n\n` +
                     `*Detail Layanan:*\n${featuresList}\n\n` +
                     `Bisa bantu proses selanjutnya?`;
-    
-    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const handleQuotation = (serviceName: string) => {
+    const message = `Halo Ruang Imaji, saya ingin konsultasi mengenai ${serviceName}.`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (loading) {
     return (
       <section id="packages" className="py-24 md:py-48 bg-[#fbfaf8] relative overflow-hidden flex items-center justify-center min-h-[600px]">
-        <motion.img 
-          src="/imajiLogo.svg" 
-          className="w-20 h-20" 
-          animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
-        />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin" />
+        </div>
       </section>
     );
   }
@@ -206,7 +193,6 @@ const PackageSection: React.FC = () => {
                         pkg.is_popular ? 'border-[#c5a059] shadow-xl shadow-[#c5a059]/5 scale-105 z-10' : 'border-[#c5a059]/5'
                       }`}
                     >
-                      {/* Popular Badge */}
                       {pkg.is_popular && (
                         <div className="absolute top-8 right-8 bg-[#c5a059] text-white px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg animate-pulse flex items-center gap-2">
                           <Star size={10} fill="currentColor" /> POPULAR CHOICE
@@ -216,22 +202,14 @@ const PackageSection: React.FC = () => {
                       <div className="mb-10">
                         <span className="text-[10px] font-bold text-[#c5a059] uppercase tracking-[0.4em] mb-2 block">{pkg.tier}</span>
                         <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#2d2a26] mb-6 leading-tight">{pkg.name}</h3>
-                        
                         <div className="space-y-1">
-                          <span className="text-xs text-[#2d2a26]/30 line-through block font-medium">
-                            {formatIDR(pkg.price_amount)}
-                          </span>
+                          <span className="text-xs text-[#2d2a26]/30 line-through block font-medium">{formatIDR(pkg.price_amount)}</span>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-4xl md:text-5xl font-bold text-[#c5a059] tracking-tighter">
-                              {formatIDR(pkg.discount_amount)}
-                            </span>
+                            <span className="text-4xl md:text-5xl font-bold text-[#c5a059] tracking-tighter">{formatIDR(pkg.discount_amount)}</span>
                           </div>
-                          
                           {savings > 0 && (
                             <div className="inline-block mt-3 px-3 py-1 bg-[#f3eee5] rounded-lg border border-[#c5a059]/10">
-                              <span className="text-[9px] font-bold text-[#c5a059] uppercase tracking-widest">
-                                HEMAT {formatIDR(savings)}
-                              </span>
+                              <span className="text-[9px] font-bold text-[#c5a059] uppercase tracking-widest">HEMAT {formatIDR(savings)}</span>
                             </div>
                           )}
                         </div>
@@ -245,14 +223,8 @@ const PackageSection: React.FC = () => {
                                 <Check size={10} className="text-[#c5a059] group-hover/item:text-white transition-colors" />
                               </div>
                               <div className="flex flex-col">
-                                <p className="text-[13px] md:text-sm text-[#2d2a26]/70 leading-relaxed font-medium">
-                                  {feature.feature}
-                                </p>
-
-                                <p className="text-[10px] md:text-[11px] text-[#c5a059]/60 italic font-light mt-0.5">
-                                  {autoTranslateToIndo(feature.feature)}
-                                </p>
-
+                                <p className="text-[13px] md:text-sm text-[#2d2a26]/70 leading-relaxed font-medium">{feature.feature}</p>
+                                <p className="text-[10px] md:text-[11px] text-[#c5a059]/60 italic font-light mt-0.5">{autoTranslateToIndo(feature.feature)}</p>
                               </div>
                             </div>
                           ))}
@@ -264,9 +236,7 @@ const PackageSection: React.FC = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleBooking(pkg, activeService)}
                         className={`w-full py-5 rounded-[1.25rem] font-bold uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-3 transition-all ${
-                          pkg.is_popular 
-                            ? 'bg-[#c5a059] text-white shadow-xl shadow-[#c5a059]/20' 
-                            : 'bg-[#fbfaf8] text-[#2d2a26]/60 border border-[#2d2a26]/5 hover:bg-[#c5a059] hover:text-white hover:shadow-lg'
+                          pkg.is_popular ? 'bg-[#c5a059] text-white shadow-xl shadow-[#c5a059]/20' : 'bg-[#fbfaf8] text-[#2d2a26]/60 border border-[#2d2a26]/5 hover:bg-[#c5a059] hover:text-white hover:shadow-lg'
                         }`}
                       >
                         SECURE RESERVATION <Send size={12} />
@@ -276,15 +246,33 @@ const PackageSection: React.FC = () => {
                 })}
               </div>
 
+              {/* Order Form Prompt Button */}
+              {activeService.name.toUpperCase().includes('WEBSITE') && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  className="mt-16 flex justify-center"
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsOrderFormOpen(true)}
+                    className="flex items-center gap-4 px-12 py-6 bg-white border-2 border-[#c5a059] text-[#c5a059] rounded-full font-bold uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-[#c5a059]/10 hover:bg-[#c5a059] hover:text-white transition-all group"
+                  >
+                    <FileText size={18} className="group-hover:rotate-12 transition-transform" />
+                    Isi Form data lengkap anda untuk website?
+                  </motion.button>
+                </motion.div>
+              )}
+
               {/* Service Description Footer */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mt-20 p-10 md:p-14 rounded-[3.5rem] bg-[#2d2a26] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden"
+                className="mt-12 p-10 md:p-14 rounded-[3.5rem] bg-[#2d2a26] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-80 h-80 bg-[#c5a059]/5 blur-[80px] rounded-full pointer-events-none" />
-                
                 <div className="max-w-xl relative z-10 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-4 mb-5">
                     <div className="w-10 h-10 bg-[#c5a059] rounded-xl flex items-center justify-center shadow-lg">
@@ -300,13 +288,24 @@ const PackageSection: React.FC = () => {
                 <motion.button 
                   whileHover={{ scale: 1.05, x: 5 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => window.open(`https://wa.me/62895428433006?text=${encodeURIComponent(`Halo Ruang Imaji, saya ingin konsultasi mengenai ${activeService.name}.`)}`, '_blank')}
+                  onClick={() => handleQuotation(activeService.name)}
                   className="px-12 py-5 bg-[#c5a059] text-white rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] whitespace-nowrap shadow-xl shadow-[#c5a059]/20 flex items-center gap-3 group relative z-10"
                 >
                   GET CUSTOM QUOTATION <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </motion.div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Full Screen Order Form Modal */}
+        <AnimatePresence>
+          {isOrderFormOpen && (
+            <OrderForm 
+              onClose={() => setIsOrderFormOpen(false)} 
+              packages={activeService?.packages || []}
+              whatsappNumber={WHATSAPP_NUMBER}
+            />
           )}
         </AnimatePresence>
       </div>
