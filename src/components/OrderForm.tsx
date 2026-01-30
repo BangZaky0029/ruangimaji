@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, ChevronRight, ChevronLeft, CheckCircle2, Loader2, Globe, Palette, Layout, Briefcase, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -64,10 +64,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onClose, packages, whatsappNumber
     additional_notes: '',
     agree_terms: false
   });
-
-  const selectedPkg = useMemo(() => {
-    return packages.find(p => p.id === formData.selected_package_id);
-  }, [formData.selected_package_id, packages]);
 
   const handleNext = () => setStep(s => Math.min(STEPS.length, s + 1));
   const handlePrev = () => setStep(s => Math.max(1, s - 1));
