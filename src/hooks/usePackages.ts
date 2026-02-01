@@ -15,7 +15,7 @@ export interface Package {
   id: string;
   service_id: string;
   name: string;
-  tier: 'BASIC' | 'PREMIUM' | 'PRO';
+  tier: string;
   price_amount: number;
   discount_amount: number;
   color: string;
@@ -26,7 +26,6 @@ export interface Package {
 export interface PackageFeature {
   id: string;
   package_id: string;
-  feature_type_id: number;
   feature: string;
   order_index: number;
   type_code: string;
@@ -41,69 +40,111 @@ export const usePackages = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Using Supabase joins to get everything in one go
-        const { data, error: serviceError } = await supabase
-            .from('services')
+        setError(null);
+
+        // We use explicit constraint names from the schema to resolve ambiguity (PGRST201)
+        // packages references services via packages_service_fk
+        // package_features references packages via package_features_package_id_fkey
+        // package_feature_types references package_features via package_features_type_fk
+        const { data: servicesData, error: serviceError } = await supabase
+          .from('services')
+          .select(`
+            id,
+            name,
+            slug,
+            description,
+            packages!packages_service_fk (
+              id,
+              service_id,
+              name,
+              tier,
+              price_amount,
+              discount_amount,
+              color,
+              is_popular,
+              package_features!package_features_package_id_fkey (
+                id,
+                feature,
+                order_index,
+                package_feature_types!package_features_type_fk (
+                  code
+                )
+              )
+            )
+          `)
+          .order('name');
+
+        if (serviceError) {
+          console.warn('Gagal fetch services, mencoba fallback ke packages:', serviceError);
+          
+          const { data: pkgs, error: pkgError } = await supabase
+            .from('packages')
             .select(`
+              id,
+              service_id,
+              name,
+              tier,
+              price_amount,
+              discount_amount,
+              color,
+              is_popular,
+              package_features!package_features_package_id_fkey (
                 id,
-                name,
-                slug,
-                description,
-                packages (
-                id,
-                service_id,
-                name,
-                tier,
-                price_amount,
-                discount_amount,
-                color,
-                is_popular,
-                package_features!package_features_package_id_fkey (
-                    id,
-                    feature,
-                    order_index,
-                    package_feature_types (
-                    code
-                    )
-                )
-                )
-            `)
-            .order('name');
+                feature,
+                order_index,
+                package_feature_types!package_features_type_fk (code)
+              )
+            `);
 
+          if (pkgError) throw pkgError;
 
-        if (serviceError) throw serviceError;
-
-        // Transform the nested data into a flatter structure for the UI
-        const formattedServices: Service[] = (data || []).map((service: any) => ({
-          ...service,
-          packages: (service.packages || []).map((pkg: any) => ({
-            ...pkg,
-            features: (pkg.package_features || []).map((f: any) => ({
-              id: f.id,
-              feature: f.feature,
-              order_index: f.order_index,
-              type_code: f.package_feature_types?.code || 'general'
-            })).sort((a: any, b: any) => a.order_index - b.order_index)
-          })).sort((a: any, b: any) => {
-            const tiers = { 'BASIC': 1, 'PREMIUM': 2, 'PRO': 3 };
-            return (tiers[a.tier as keyof typeof tiers] || 0) - (tiers[b.tier as keyof typeof tiers] || 0);
-          })
-        })).sort((a: any, b: any) => {
-          // Manual sorting priority based on user request
-          const getPriority = (name: string) => {
-            const n = name.toUpperCase();
-            if (n.includes('PREWEDDING')) return 1;
-            if (n.includes('MEDSOS') || n.includes('SOCIAL')) return 2;
-            if (n.includes('WEBSITE')) return 3;
-            return 4;
-          };
-          return getPriority(a.name) - getPriority(b.name);
-        });
-
-        setServices(formattedServices);
+          if (pkgs && pkgs.length > 0) {
+            const synthesizedService: Service = {
+              id: 'default',
+              name: 'Paket Produksi',
+              slug: 'paket-produksi',
+              description: 'Layanan produksi kreatif premium kami.',
+              packages: pkgs.map((pkg: any) => ({
+                ...pkg,
+                price_amount: Number(pkg.price_amount || 0),
+                discount_amount: Number(pkg.discount_amount || 0),
+                features: (pkg.package_features || []).map((f: any) => ({
+                  id: f.id,
+                  feature: f.feature,
+                  order_index: f.order_index,
+                  type_code: f.package_feature_types?.code || 'general'
+                })).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+              }))
+            };
+            setServices([synthesizedService]);
+          } else {
+            setServices([]);
+          }
+        } else {
+          const formattedServices: Service[] = (servicesData || []).map((service: any) => ({
+            ...service,
+            packages: (service.packages || []).map((pkg: any) => ({
+              ...pkg,
+              price_amount: Number(pkg.price_amount || 0),
+              discount_amount: Number(pkg.discount_amount || 0),
+              features: (pkg.package_features || []).map((f: any) => ({
+                id: f.id,
+                feature: f.feature,
+                order_index: f.order_index,
+                type_code: f.package_feature_types?.code || 'general'
+              })).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+            })).sort((a: any, b: any) => {
+              const tiers: Record<string, number> = { 'BASIC': 1, 'PREMIUM': 2, 'PRO': 3 };
+              const tierA = (a.tier || '').toUpperCase();
+              const tierB = (b.tier || '').toUpperCase();
+              return (tiers[tierA] || 99) - (tiers[tierB] || 99);
+            })
+          }));
+          setServices(formattedServices);
+        }
       } catch (err) {
         console.error('Error fetching package data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch services');
+        setError(err instanceof Error ? err.message : 'Gagal memuat data paket');
       } finally {
         setLoading(false);
       }

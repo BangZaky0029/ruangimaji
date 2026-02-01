@@ -1,3 +1,4 @@
+
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\WorkSection.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useProjects } from '../hooks/useSupabaseData';
 import type { Project } from '../hooks/useSupabaseData';
-import { isYouTubeUrl, getYouTubeEmbedUrl } from '../lib/videoUtils';
+import { isYouTubeUrl, getVideoPlatform, getYouTubeEmbedUrl } from '../lib/videoUtils';
 
 const ARC_RADIUS = 700;
 const ITEM_OFFSET = 18;
@@ -39,6 +40,7 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
   const opacity = Math.max(0, 1 - Math.abs(relativeIndex) * 0.4);
   const scale = activeIndex === index ? 1 : 0.75 - Math.abs(relativeIndex) * 0.05;
   const isCenter = activeIndex === index;
+  const isInstagram = getVideoPlatform(item.video_url || '') === 'instagram';
 
   return (
     <motion.div
@@ -56,7 +58,7 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
     >
       <div className={`relative group overflow-hidden rounded-2xl transition-all duration-500 border-2 ${isCenter ? 'border-[#c5a059] shadow-2xl shadow-[#c5a059]/20 w-[240px] md:w-[320px]' : 'border-[#2d2a26]/5 w-[160px] md:w-[200px]'} aspect-square md:aspect-[4/5] bg-black`}>
         <AnimatePresence mode="wait">
-          {isPlaying && item.video_url ? (
+          {isPlaying && item.video_url && !isInstagram ? (
             <motion.div 
               key="inline-video"
               initial={{ opacity: 0 }}
@@ -112,9 +114,10 @@ const ArcItem: React.FC<ArcItemProps> = ({ item, index, activeIndex, side, isPla
 
 interface WorkSectionProps {
   onSeeAll: (type: 'Photo' | 'Video') => void;
+  onOpenVideo?: (url: string) => void;
 }
 
-const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
+const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll, onOpenVideo }) => {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [activeVideoIdx, setActiveVideoIdx] = useState(0);
   const [viewMode, setViewMode] = useState<'Photo' | 'Video'>('Photo');
@@ -124,6 +127,15 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
   const photos = portfolioData.Photo || [];
   const videos = portfolioData.Video || [];
   const currentBackground = viewMode === 'Video' ? videos[activeVideoIdx]?.image_url : photos[activePhotoIdx]?.image_url;
+
+  const handlePlay = (item: Project) => {
+    const platform = getVideoPlatform(item.video_url || '');
+    if (platform === 'instagram' && onOpenVideo) {
+      onOpenVideo(item.video_url!);
+    } else {
+      setPlayingVideoId(item.id);
+    }
+  };
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const isHorizontal = Math.abs(info.offset.x) > Math.abs(info.offset.y);
@@ -143,7 +155,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
     return (
       <section id="work" className="relative h-screen bg-[#fbfaf8] flex items-center justify-center">
         <motion.img 
-          src="/imajiLogo.svg" 
+          src="/imajiLogo.png" 
           className="w-20 h-20" 
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
@@ -180,15 +192,14 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
 
         <motion.div drag="x" dragConstraints={{ left: 0, right: 0 }} onDragEnd={handleDragEnd} className="relative w-full h-full flex items-center justify-between pointer-events-auto cursor-grab active:cursor-grabbing">
           <motion.div animate={{ x: viewMode === 'Photo' ? (window.innerWidth < 768 ? '0%' : '25%') : '-100%', opacity: viewMode === 'Video' ? 0 : 1 }} className="relative w-full md:w-1/2 h-full flex items-center justify-center md:justify-start pointer-events-none">
-             {photos.map((item, i) => <ArcItem key={item.id} item={item} index={i} activeIndex={activePhotoIdx} side="left" isPlaying={playingVideoId === item.id} onClick={() => { setActivePhotoIdx(i); setPlayingVideoId(null); }} onPlay={() => setPlayingVideoId(item.id)} onClose={() => setPlayingVideoId(null)} />)}
+             {photos.map((item, i) => <ArcItem key={item.id} item={item} index={i} activeIndex={activePhotoIdx} side="left" isPlaying={playingVideoId === item.id} onClick={() => { setActivePhotoIdx(i); setPlayingVideoId(null); }} onPlay={() => handlePlay(item)} onClose={() => setPlayingVideoId(null)} />)}
           </motion.div>
           <motion.div animate={{ x: viewMode === 'Video' ? (window.innerWidth < 768 ? '0%' : '-25%') : '100%', opacity: viewMode === 'Photo' ? 0 : 1 }} className="relative w-full md:w-1/2 h-full flex items-center justify-center md:justify-end pointer-events-none">
-             {videos.map((item, i) => <ArcItem key={item.id} item={item} index={i} activeIndex={activeVideoIdx} side="right" isPlaying={playingVideoId === item.id} onClick={() => { setActiveVideoIdx(i); setPlayingVideoId(null); }} onPlay={() => setPlayingVideoId(item.id)} onClose={() => setPlayingVideoId(null)} />)}
+             {videos.map((item, i) => <ArcItem key={item.id} item={item} index={i} activeIndex={activeVideoIdx} side="right" isPlaying={playingVideoId === item.id} onClick={() => { setActiveVideoIdx(i); setPlayingVideoId(null); }} onPlay={() => handlePlay(item)} onClose={() => setPlayingVideoId(null)} />)}
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Navigation Control Pill with Vertical Arrows */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 z-40 bg-white/20 backdrop-blur-2xl px-8 py-3 rounded-full border border-white/30 shadow-2xl">
          <div className="flex items-center gap-4 border-r border-[#c5a059]/30 pr-8 text-[#2d2a26]">
             <span className="text-sm md:text-lg font-serif italic text-[#c5a059] font-bold whitespace-nowrap">
@@ -196,21 +207,40 @@ const WorkSection: React.FC<WorkSectionProps> = ({ onSeeAll }) => {
             </span>
          </div>
          <div className="flex flex-col gap-1.5 py-1">
-            <button 
-              onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.max(0, p - 1)) : setActivePhotoIdx(p => Math.max(0, p - 1)); }} 
-              className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
-              title="Previous"
-            >
-              <ChevronUp size={14} />
-            </button>
-            <button 
-              onClick={() => { setPlayingVideoId(null); viewMode === 'Video' ? setActiveVideoIdx(p => Math.min(videos.length - 1, p + 1)) : setActivePhotoIdx(p => Math.min(photos.length - 1, p + 1)); }} 
-              className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
-              title="Next"
-            >
-              <ChevronDown size={14} />
-            </button>
-         </div>
+          <button
+            onClick={() => {
+              setPlayingVideoId(null);
+
+              if (viewMode === 'Video') {
+                setActiveVideoIdx((p) => Math.max(0, p - 1));
+              } else {
+                setActivePhotoIdx((p) => Math.max(0, p - 1));
+              }
+            }}
+            className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
+          >
+            <ChevronUp size={14} />
+          </button>
+
+          <button
+            onClick={() => {
+              setPlayingVideoId(null);
+
+              if (viewMode === 'Video') {
+                setActiveVideoIdx((p) =>
+                  Math.min(videos.length - 1, p + 1)
+                );
+              } else {
+                setActivePhotoIdx((p) =>
+                  Math.min(photos.length - 1, p + 1)
+                );
+              }
+            }}
+            className="w-8 h-8 rounded-full border border-[#c5a059]/40 text-[#c5a059] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all transform active:scale-90"
+          >
+            <ChevronDown size={14} />
+          </button>
+        </div>
       </div>
     </section>
   );

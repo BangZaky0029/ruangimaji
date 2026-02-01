@@ -1,4 +1,3 @@
-
 export const isYouTubeUrl = (url: string): boolean => {
   if (!url) return false;
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -21,7 +20,6 @@ export const getYouTubeId = (url: string): string | null => {
     }
     return null;
   } catch {
-    // Fallback for tricky URLs or partials
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
@@ -41,4 +39,29 @@ export const getYouTubeEmbedUrl = (url: string, params: { autoplay?: number; mut
     ... (params.loop ? { loop: '1', playlist: id } : {})
   });
   return `https://www.youtube.com/embed/${id}?${query.toString()}`;
+};
+
+export const isInstagramUrl = (url: string): boolean => {
+  if (!url) return false;
+  return url.includes('instagram.com');
+};
+
+export const getInstagramShortcode = (url: string): string | null => {
+  if (!url) return null;
+  try {
+    const urlObj = new URL(url);
+    const parts = urlObj.pathname.split('/').filter(Boolean);
+    if (parts[0] === 'p' || parts[0] === 'reel' || parts[0] === 'tv') {
+      return parts[1];
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export const getVideoPlatform = (url: string): 'youtube' | 'instagram' | null => {
+  if (isYouTubeUrl(url)) return 'youtube';
+  if (isInstagramUrl(url)) return 'instagram';
+  return null;
 };

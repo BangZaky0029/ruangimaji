@@ -1,10 +1,11 @@
+
 //C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji\src\components\CategoryGallery.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Play, X, Filter, Camera, Film, ChevronRight, ChevronLeft, Plus } from 'lucide-react';
 import { useProjects, useCategories } from '../hooks/useSupabaseData';
 import type { Project } from '../hooks/useSupabaseData';
-import { isYouTubeUrl, getYouTubeEmbedUrl } from '../lib/videoUtils';
+import VideoEmbed from './VideoEmbed';
 
 interface CategoryGalleryProps {
   type: 'Photo' | 'Video';
@@ -14,9 +15,8 @@ interface CategoryGalleryProps {
 const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
   const [activeType, setActiveType] = useState<'Photo' | 'Video'>(type);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<Project | null>(null);
-  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const [selectedItem, setSelectedItem] = useState<Project | null>(null);
+  const [direction, setDirection] = useState(0); 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(7); 
   
@@ -37,23 +37,22 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
 
   const loading = projectsLoading || categoriesLoading;
 
-  // Find index for slider
-  const currentPhotoIndex = useMemo(() => {
-    if (!selectedPhoto) return -1;
-    return filteredItems.findIndex(item => item.id === selectedPhoto.id);
-  }, [selectedPhoto, filteredItems]);
+  const currentItemIndex = useMemo(() => {
+    if (!selectedItem) return -1;
+    return filteredItems.findIndex(item => item.id === selectedItem.id);
+  }, [selectedItem, filteredItems]);
 
   const goToNext = () => {
-    if (currentPhotoIndex < filteredItems.length - 1) {
+    if (currentItemIndex < filteredItems.length - 1) {
       setDirection(1);
-      setSelectedPhoto(filteredItems[currentPhotoIndex + 1]);
+      setSelectedItem(filteredItems[currentItemIndex + 1]);
     }
   };
 
   const goToPrev = () => {
-    if (currentPhotoIndex > 0) {
+    if (currentItemIndex > 0) {
       setDirection(-1);
-      setSelectedPhoto(filteredItems[currentPhotoIndex - 1]);
+      setSelectedItem(filteredItems[currentItemIndex - 1]);
     }
   };
 
@@ -62,25 +61,25 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
   }, [selectedCategory, activeType]);
 
   useEffect(() => {
-    if (isFilterOpen || selectedPhoto) {
+    if (isFilterOpen || selectedItem) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [isFilterOpen, selectedPhoto]);
+  }, [isFilterOpen, selectedItem]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!selectedPhoto) return;
-      if (e.key === 'ArrowRight') goToNext();
-      if (e.key === 'ArrowLeft') goToPrev();
-      if (e.key === 'Escape') setSelectedPhoto(null);
+      if (selectedItem) {
+        if (e.key === 'ArrowRight') goToNext();
+        if (e.key === 'ArrowLeft') goToPrev();
+        if (e.key === 'Escape') setSelectedItem(null);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPhoto, currentPhotoIndex, filteredItems]);
+  }, [selectedItem, currentItemIndex, filteredItems]);
 
   const handleSeeMore = () => {
     setVisibleCount(prev => prev + 6);
@@ -108,7 +107,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[160] bg-[#fbfaf8] flex items-center justify-center">
         <motion.img 
-          src="/imajiLogo.svg" 
+          src="/imajiLogo.png" 
           className="w-20 h-20" 
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
@@ -117,7 +116,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
     );
   }
 
-  // Instagram-style variants with scale and smoother X movement
   const slideVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? "100%" : "-100%",
@@ -145,7 +143,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
       animate={{ opacity: 1 }} 
       className="fixed inset-0 z-[140] bg-[#fbfaf8] overflow-y-auto overflow-x-hidden pt-28 md:pt-36 pb-32"
     >
-      {/* Mobile Filter Bubble */}
       <div className="md:hidden fixed bottom-8 right-8 z-[200]">
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -161,7 +158,6 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
         </motion.button>
       </div>
 
-      {/* Filter Overlay */}
       <AnimatePresence>
         {isFilterOpen && (
           <>
@@ -215,11 +211,9 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
           </div>
         </div>
 
-        {/* Dense Mosaic Grid */}
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 grid-auto-flow-dense">
           <AnimatePresence mode="popLayout">
             {visibleItems.map((item, index) => {
-              const isPlaying = playingVideoId === item.id;
               const gridClasses = getGridItemClasses(index);
 
               return (
@@ -229,48 +223,28 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                   transition={{ duration: 0.5 }}
                   className={`relative rounded-[1.2rem] md:rounded-[2rem] overflow-hidden group border border-[#2d2a26]/5 bg-black shadow-lg ${gridClasses}`}
                 >
-                  <AnimatePresence mode="wait">
-                    {isPlaying && item.video_url ? (
-                      <motion.div 
-                        key="video-player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-20 bg-black flex items-center justify-center w-full h-full"
-                      >
-                        {isYouTubeUrl(item.video_url) ? (
-                          <iframe src={getYouTubeEmbedUrl(item.video_url, { autoplay: 1, controls: 1 })} className="w-full h-full absolute inset-0 border-none" allow="autoplay; fullscreen" />
-                        ) : (
-                          <video src={item.video_url} className="w-full h-full object-contain bg-black" autoPlay controls playsInline />
-                        )}
-                        <button onClick={(e) => { e.stopPropagation(); setPlayingVideoId(null); }} className="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-[#c5a059] backdrop-blur-md border border-white/20 transition-all shadow-xl"><X size={18} /></button>
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        key="static-preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-                        className="w-full h-full cursor-pointer relative" 
-                        onClick={() => {
-                          if (activeType === 'Video') {
-                            setPlayingVideoId(item.id);
-                          } else {
-                            setDirection(0);
-                            setSelectedPhoto(item);
-                          }
-                        }}
-                      >
-                        <img src={item.image_url} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt={item.title} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent p-6 md:p-8 flex flex-col justify-end transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100">
-                           <span className="text-[9px] font-bold text-[#c5a059] uppercase tracking-widest mb-1.5 block">{item.category}</span>
-                           <h3 className="text-lg md:text-2xl font-serif font-bold text-white mb-2 leading-tight">{item.title}</h3>
-                           <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest text-white/60">
-                             {activeType === 'Video' ? <><Play size={10} className="text-[#c5a059]" fill="currentColor" /> Play</> : 'View Project'}
-                           </div>
-                        </div>
-                        {activeType === 'Video' && (
-                          <div className="absolute inset-0 flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                             <div className="w-14 h-14 rounded-full bg-[#c5a059]/90 backdrop-blur-md flex items-center justify-center text-white shadow-2xl border border-white/20"><Play fill="currentColor" size={20} className="ml-0.5" /></div>
-                          </div>
-                        )}
-                      </motion.div>
+                  <motion.div 
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
+                    className="w-full h-full cursor-pointer relative" 
+                    onClick={() => {
+                      setDirection(0);
+                      setSelectedItem(item);
+                    }}
+                  >
+                    <img src={item.image_url} className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt={item.title} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent p-6 md:p-8 flex flex-col justify-end transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                       <span className="text-[9px] font-bold text-[#c5a059] uppercase tracking-widest mb-1.5 block">{item.category}</span>
+                       <h3 className="text-lg md:text-2xl font-serif font-bold text-white mb-2 leading-tight">{item.title}</h3>
+                       <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest text-white/60">
+                         {activeType === 'Video' ? <><Play size={10} className="text-[#c5a059]" fill="currentColor" /> Play Production</> : 'View Project'}
+                       </div>
+                    </div>
+                    {activeType === 'Video' && (
+                      <div className="absolute inset-0 flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                         <div className="w-14 h-14 rounded-full bg-[#c5a059]/90 backdrop-blur-md flex items-center justify-center text-white shadow-2xl border border-white/20"><Play fill="currentColor" size={20} className="ml-0.5" /></div>
+                      </div>
                     )}
-                  </AnimatePresence>
+                  </motion.div>
                 </motion.div>
               );
             })}
@@ -297,50 +271,46 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
         )}
       </div>
 
-      {/* Photo Details Lightbox with Swiping ONLY inside the Image Frame */}
       <AnimatePresence>
-        {selectedPhoto && (
+        {selectedItem && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
             className="fixed inset-0 z-[300] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-0 md:p-10"
-            onClick={() => setSelectedPhoto(null)}
+            onClick={() => setSelectedItem(null)}
           >
-            {/* Navigation Arrows - Desktop Only */}
+            {/* Navigasi Samping Desktop */}
             <div className="hidden md:flex absolute inset-x-10 top-1/2 -translate-y-1/2 justify-between z-[320] pointer-events-none">
               <button 
                 onClick={(e) => { e.stopPropagation(); goToPrev(); }} 
-                disabled={currentPhotoIndex === 0}
-                className={`w-16 h-16 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#2d2a26] border border-white/20 flex items-center justify-center transition-all backdrop-blur-md pointer-events-auto ${currentPhotoIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
+                disabled={currentItemIndex === 0}
+                className={`w-16 h-16 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#2d2a26] border border-white/20 flex items-center justify-center transition-all backdrop-blur-md pointer-events-auto ${currentItemIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
               >
                 <ChevronLeft size={32} />
               </button>
               <button 
                 onClick={(e) => { e.stopPropagation(); goToNext(); }} 
-                disabled={currentPhotoIndex === filteredItems.length - 1}
-                className={`w-16 h-16 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#2d2a26] border border-white/20 flex items-center justify-center transition-all backdrop-blur-md pointer-events-auto ${currentPhotoIndex === filteredItems.length - 1 ? 'opacity-0' : 'opacity-100'}`}
+                disabled={currentItemIndex === filteredItems.length - 1}
+                className={`w-16 h-16 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#2d2a26] border border-white/20 flex items-center justify-center transition-all backdrop-blur-md pointer-events-auto ${currentItemIndex === filteredItems.length - 1 ? 'opacity-0' : 'opacity-100'}`}
               >
                 <ChevronRight size={32} />
               </button>
             </div>
 
-            {/* Header / Info - Mobile Indicator */}
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[320] text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] bg-black/20 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
-              {currentPhotoIndex + 1} / {filteredItems.length}
+              {currentItemIndex + 1} / {filteredItems.length}
             </div>
 
-            <button onClick={() => setSelectedPhoto(null)} className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-[#c5a059] text-white flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-xl z-[330]"><X size={24} /></button>
+            <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-[#c5a059] text-white flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-xl z-[330]"><X size={24} /></button>
 
-            {/* Container Pembungkus Tetap Diam */}
             <div className="w-full h-full flex items-center justify-center p-4">
               <div 
-                className={`relative w-full ${selectedPhoto.aspect_ratio === 'portrait' ? 'max-w-[420px]' : 'max-w-[1000px]'} bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col`}
+                className={`relative w-full ${selectedItem.aspect_ratio === 'portrait' ? 'max-w-[420px]' : 'max-w-[1000px]'} bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col`}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Bagian Image yang Bergeser */}
                 <div className="relative w-full h-[50vh] md:h-[65vh] bg-black overflow-hidden select-none">
                   <AnimatePresence initial={false} custom={direction} mode="popLayout">
                     <motion.div 
-                      key={selectedPhoto.id}
+                      key={selectedItem.id}
                       custom={direction}
                       variants={slideVariants}
                       initial="enter"
@@ -353,7 +323,7 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                       }}
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.4} // Firmer drag for better control
+                      dragElastic={0.4}
                       onDragEnd={(_e, { offset, velocity }) => {
                         const swipe = Math.abs(offset.x) * velocity.x;
                         if (swipe < -10000 || offset.x < -80) {
@@ -364,21 +334,26 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                       }}
                       className="absolute inset-0 w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
                     >
-                      <img 
-                        src={selectedPhoto.image_url} 
-                        alt={selectedPhoto.title} 
-                        className="w-full h-full object-contain pointer-events-none" 
-                      />
+                      {selectedItem.type === 'Video' && selectedItem.video_url ? (
+                        <div className="w-full h-full pointer-events-auto">
+                           <VideoEmbed url={selectedItem.video_url} />
+                        </div>
+                      ) : (
+                        <img 
+                          src={selectedItem.image_url} 
+                          alt={selectedItem.title} 
+                          className="w-full h-full object-contain pointer-events-none" 
+                        />
+                      )}
                     </motion.div>
                   </AnimatePresence>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                 </div>
                 
-                {/* Bagian Info Tetap Diam (Kontainer Bawah) */}
                 <div className="p-8 md:p-12 bg-white flex flex-col gap-6">
                   <AnimatePresence mode="wait">
                     <motion.div 
-                      key={`info-${selectedPhoto.id}`}
+                      key={`info-${selectedItem.id}`}
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
@@ -386,16 +361,12 @@ const CategoryGallery: React.FC<CategoryGalleryProps> = ({ type, onBack }) => {
                       className="space-y-6"
                     >
                       <div className="space-y-3">
-                        <span className="text-[10px] font-bold text-[#c5a059] uppercase tracking-[0.4em] block">{selectedPhoto.category}</span>
-                        <h3 className="text-2xl md:text-5xl font-serif font-bold text-[#2d2a26] leading-none tracking-tight">{selectedPhoto.title}</h3>
+                        <span className="text-[10px] font-bold text-[#c5a059] uppercase tracking-[0.4em] block">{selectedItem.category}</span>
+                        <h3 className="text-2xl md:text-5xl font-serif font-bold text-[#2d2a26] leading-none tracking-tight">{selectedItem.title}</h3>
                       </div>
                       <div className="h-[1px] w-full bg-[#2d2a26]/5" />
                       <div className="text-[#2d2a26]/60 text-sm md:text-base font-light leading-relaxed line-clamp-3 md:line-clamp-none">
-                        {selectedPhoto.description || "Sebuah karya visual yang menangkap esensi dari momen dan cerita di balik lensa. Bagian dari koleksi portofolio eksklusif Ruang Imaji."}
-                      </div>
-                      <div className="flex items-center gap-6 pt-2">
-                        <div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-widest text-[#2d2a26]/20">Client</span><span className="text-xs font-bold text-[#2d2a26]/80">Portfolio Selection</span></div>
-                        <div className="w-[1px] h-8 bg-[#2d2a26]/5" /><div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-widest text-[#2d2a26]/20">Year</span><span className="text-xs font-bold text-[#2d2a26]/80">2024</span></div>
+                        {selectedItem.description || "Visual narratives captured with precision and cinematic depth. Part of the exclusive collection by Ruang Imaji."}
                       </div>
                     </motion.div>
                   </AnimatePresence>

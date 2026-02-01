@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-// Types based on database schema
+// Existing types...
 export interface Brand {
   id: string;
   name: string;
@@ -29,46 +29,35 @@ export interface HeroSlide {
   created_at: string;
 }
 
-export interface Package {
-  id: string;
-  name: string;
-  price: string;
-  discount: string;
-  color: string;
-  created_at: string;
-  features?: PackageFeature[];
-}
-
-export interface PackageFeature {
-  id: string;
-  package_id: string;
-  type: 'photo' | 'video';
-  feature: string;
-}
-
-export interface Project {
+// New Portfolio Case Study Types
+export interface PortfolioProject {
   id: string;
   title: string;
-  description: string;
+  slug: string;
+  short_description: string;
+  full_description: string;
+  live_url: string;
+  preview_url: string | null;
+  thumbnail_url: string;
   category: string;
-  type: 'Photo' | 'Video';
-  image_url: string;
-  video_url: string | null;
-  aspect_ratio: 'landscape' | 'portrait';
+  tech_stack: string[] | null;
+  is_featured: boolean;
+  is_active: boolean;
+  display_order: number;
   created_at: string;
+  updated_at: string;
 }
 
-export interface TeamMember {
+export interface PortfolioScreenshot {
   id: string;
-  name: string;
-  role: string;
+  project_id: string;
   image_url: string;
-  label: string;
-  order_index: number;
+  caption: string | null;
+  display_order: number;
   created_at: string;
 }
 
-// Hook for fetching brands
+// Existing hooks...
 export const useBrands = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,14 +83,12 @@ export const useBrands = () => {
     fetchBrands();
   }, []);
 
-  // Split brands into rows based on row_position
   const brandsRow1 = brands.filter(b => b.row_position === 1).map(b => b.name);
   const brandsRow2 = brands.filter(b => b.row_position === 2).map(b => b.name);
 
   return { brands, brandsRow1, brandsRow2, loading, error };
 };
 
-// Hook for fetching categories
 export const useCategories = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +117,6 @@ export const useCategories = () => {
   return { categories, loading, error };
 };
 
-// Hook for fetching hero slides
 export const useHeroSlides = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,64 +145,86 @@ export const useHeroSlides = () => {
   return { heroSlides, loading, error };
 };
 
-// Hook for fetching packages with features
-export const usePackages = () => {
-  const [packages, setPackages] = useState<Package[]>([]);
+// New Case Study Hook
+export const usePortfolioProjects = () => {
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPackages = async () => {
+    const fetchProjects = async () => {
       try {
-        // Fetch packages
-        const { data: packagesData, error: packagesError } = await supabase
-          .from('packages')
+        const { data, error } = await supabase
+          .from('portfolio_projects')
           .select('*')
-          .order('created_at', { ascending: true });
+          .eq('is_active', true)
+          .order('display_order', { ascending: true });
 
-        if (packagesError) throw packagesError;
-
-        // Fetch all package features
-        const { data: featuresData, error: featuresError } = await supabase
-          .from('package_features')
-          .select('*');
-
-        if (featuresError) throw featuresError;
-
-        // Combine packages with their features
-        const packagesWithFeatures = packagesData?.map(pkg => ({
-          ...pkg,
-          features: featuresData?.filter(f => f.package_id === pkg.id) || []
-        })) || [];
-
-        setPackages(packagesWithFeatures);
+        if (error) throw error;
+        setProjects(data || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch packages');
+        setError(err instanceof Error ? err.message : 'Failed to fetch projects');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPackages();
+    fetchProjects();
   }, []);
 
-  // Transform packages to match the old format
-  const formattedPackages = packages.map(pkg => ({
-    name: pkg.name,
-    price: pkg.price,
-    discount: pkg.discount,
-    color: pkg.color || 'border-[#c5a059]/10',
-    deliverables: {
-      photo: pkg.features?.filter(f => f.type === 'photo').map(f => f.feature) || [],
-      video: pkg.features?.filter(f => f.type === 'video').map(f => f.feature) || []
-    }
-  }));
-
-  return { packages: formattedPackages, loading, error };
+  return { projects, loading, error };
 };
 
-// Hook for fetching projects (portfolio items)
+export const usePortfolioScreenshots = (projectId: string | null) => {
+  const [screenshots, setScreenshots] = useState<PortfolioScreenshot[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!projectId) {
+      setScreenshots([]);
+      return;
+    }
+
+    const fetchScreenshots = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('portfolio_screenshots')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setScreenshots(data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch screenshots');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScreenshots();
+  }, [projectId]);
+
+  return { screenshots, loading, error };
+};
+
+// Renamed ProjectLegacy to Project to fix export-related errors in multiple components
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  type: 'Photo' | 'Video';
+  image_url: string;
+  video_url: string | null;
+  aspect_ratio: 'landscape' | 'portrait';
+  created_at: string;
+}
+
 export const useProjects = () => {
+  // Updated type from ProjectLegacy to Project
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -241,7 +249,6 @@ export const useProjects = () => {
     fetchProjects();
   }, []);
 
-  // Organize projects by type
   const portfolioData = {
     Photo: projects.filter(p => p.type === 'Photo'),
     Video: projects.filter(p => p.type === 'Video')
@@ -250,7 +257,16 @@ export const useProjects = () => {
   return { projects, portfolioData, loading, error };
 };
 
-// Hook for fetching team members
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  image_url: string;
+  label: string;
+  order_index: number;
+  created_at: string;
+}
+
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
