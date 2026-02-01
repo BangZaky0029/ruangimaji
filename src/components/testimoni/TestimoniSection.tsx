@@ -12,7 +12,7 @@ const TestimoniSection: React.FC = () => {
   const [view, setView] = useState<'hero' | 'form'>('hero');
   // Added state to handle the selected testimonial from floating list
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
-  const { testimonials, submitTestimonial, loading } = useTestimoni();
+  const { testimonials, submitTestimonial } = useTestimoni();
 
   return (
     <section id="testimonials" className="relative min-h-screen bg-[#2d2a26] flex items-center justify-center overflow-hidden py-32">
