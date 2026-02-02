@@ -267,6 +267,22 @@ export interface TeamMember {
   created_at: string;
 }
 
+export interface TeamMemberAbout {
+  id: string;
+  team_member_id: string;
+  bio: string;
+  motto: string;
+  expertise: string[];
+  achievements: string[];
+  whatsapp: string;
+  instagram: string;
+  instagram_2: string | null;
+  project_1: string | null;
+  project_2: string | null;
+  project_3: string | null;
+  created_at: string;
+}
+
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -293,4 +309,36 @@ export const useTeamMembers = () => {
   }, []);
 
   return { teamMembers, loading, error };
+};
+
+export const useTeamMemberAbout = (memberId: string | null) => {
+  const [about, setAbout] = useState<TeamMemberAbout | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!memberId) return;
+
+    const fetchAbout = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('team_member_about')
+          .select('*')
+          .eq('team_member_id', memberId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows found"
+        setAbout(data || null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch team member info');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAbout();
+  }, [memberId]);
+
+  return { about, loading, error };
 };

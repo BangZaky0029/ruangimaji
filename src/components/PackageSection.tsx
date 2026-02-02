@@ -7,7 +7,7 @@ import { usePackages } from '../hooks/usePackages';
 import type { Service, Package } from '../hooks/usePackages';
 import OrderForm from './OrderForm';
 
-const WHATSAPP_NUMBER = "62895428433006";
+const WHATSAPP_NUMBER = "6281995770190";
 
 const formatIDR = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
@@ -110,12 +110,12 @@ const PackageSection: React.FC = () => {
   // Reorder services to place Website in the second position
   const sortedServices = useMemo(() => {
     if (!services || services.length < 2) return services;
-    
+
     const websiteService = services.find(s => s.name.toUpperCase().includes('WEBSITE'));
     if (!websiteService) return services;
 
     const remaining = services.filter(s => s.id !== websiteService.id);
-    
+
     // Construct new array: [First, Website, ...others]
     const result = [remaining[0], websiteService, ...remaining.slice(1)];
     return result;
@@ -135,9 +135,9 @@ const PackageSection: React.FC = () => {
     const discountPrice = formatIDR(pkg.discount_amount);
     const featuresList = (pkg.features || []).map(f => `- ${f.feature}`).join('\n');
     const message = `Halo Ruang Imaji, saya tertarik untuk booking paket *${pkg.name}* dari layanan *${service.name}*.\n\n` +
-                    `*Harga Promo:* ${discountPrice}\n\n` +
-                    `*Detail Layanan:*\n${featuresList}\n\n` +
-                    `Bisa bantu proses selanjutnya?`;
+      `*Harga Promo:* ${discountPrice}\n\n` +
+      `*Detail Layanan:*\n${featuresList}\n\n` +
+      `Bisa bantu proses selanjutnya?`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -194,11 +194,10 @@ const PackageSection: React.FC = () => {
                   <button
                     key={service.id}
                     onClick={() => setActiveServiceIdx(idx)}
-                    className={`px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-500 whitespace-nowrap relative group ${
-                      activeServiceIdx === idx 
-                        ? 'bg-[#c5a059] text-white shadow-lg shadow-[#c5a059]/30 scale-105' 
+                    className={`px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-500 whitespace-nowrap relative group ${activeServiceIdx === idx
+                        ? 'bg-[#c5a059] text-white shadow-lg shadow-[#c5a059]/30 scale-105'
                         : 'text-[#2d2a26]/30 hover:text-[#2d2a26]'
-                    }`}
+                      }`}
                   >
                     <span className="relative z-10">{getTabLabel(service.name)}</span>
                   </button>
@@ -224,9 +223,8 @@ const PackageSection: React.FC = () => {
                           initial={{ opacity: 0, y: 40 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.15 }}
-                          className={`relative p-10 md:p-14 rounded-[3rem] bg-white border-2 flex flex-col transition-all duration-700 hover:shadow-2xl hover:shadow-[#c5a059]/15 group ${
-                            pkg.is_popular ? 'border-[#c5a059] shadow-xl shadow-[#c5a059]/5 lg:scale-105 z-10' : 'border-[#2d2a26]/5'
-                          }`}
+                          className={`relative p-10 md:p-14 rounded-[3rem] bg-white border-2 flex flex-col transition-all duration-700 hover:shadow-2xl hover:shadow-[#c5a059]/15 group ${pkg.is_popular ? 'border-[#c5a059] shadow-xl shadow-[#c5a059]/5 lg:scale-105 z-10' : 'border-[#2d2a26]/5'
+                            }`}
                         >
                           {pkg.is_popular && (
                             <div className="absolute top-8 right-8 bg-[#c5a059] text-white px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg animate-pulse flex items-center gap-2">
@@ -270,9 +268,8 @@ const PackageSection: React.FC = () => {
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => handleBooking(pkg, activeService)}
-                            className={`w-full py-5 rounded-[1.25rem] font-bold uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-3 transition-all ${
-                              pkg.is_popular ? 'bg-[#c5a059] text-white shadow-xl shadow-[#c5a059]/20' : 'bg-[#fbfaf8] text-[#2d2a26]/60 border border-[#2d2a26]/5 hover:bg-[#c5a059] hover:text-white hover:shadow-lg'
-                            }`}
+                            className={`w-full py-5 rounded-[1.25rem] font-bold uppercase tracking-[0.3em] text-[10px] flex items-center justify-center gap-3 transition-all ${pkg.is_popular ? 'bg-[#c5a059] text-white shadow-xl shadow-[#c5a059]/20' : 'bg-[#fbfaf8] text-[#2d2a26]/60 border border-[#2d2a26]/5 hover:bg-[#c5a059] hover:text-white hover:shadow-lg'
+                              }`}
                           >
                             SECURE RESERVATION <Send size={12} />
                           </motion.button>
@@ -297,7 +294,7 @@ const PackageSection: React.FC = () => {
                   )}
 
                   {/* Footer Description */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     className="mt-12 p-10 md:p-14 rounded-[3.5rem] bg-[#2d2a26] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden"
@@ -314,7 +311,7 @@ const PackageSection: React.FC = () => {
                         {activeService.description || "Solusi kustom untuk kebutuhan branding dan produksi digital skala besar."}
                       </p>
                     </div>
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.05, x: 5 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleQuotation(activeService.name)}
@@ -331,8 +328,8 @@ const PackageSection: React.FC = () => {
 
         <AnimatePresence>
           {isOrderFormOpen && (
-            <OrderForm 
-              onClose={() => setIsOrderFormOpen(false)} 
+            <OrderForm
+              onClose={() => setIsOrderFormOpen(false)}
               packages={activeService?.packages || []}
               whatsappNumber={WHATSAPP_NUMBER}
             />

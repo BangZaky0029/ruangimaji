@@ -6,7 +6,7 @@ import { useCategories } from '../hooks/useSupabaseData';
 import logo from "../assets/image/imaji_logo_1.png";
 
 interface FooterProps {
-  onLinkClick?: () => void;
+  onLinkClick?: (href: string) => void;
   onPortfolioClick?: () => void;
   onNavigateToLegal?: (page: 'home' | 'privacy' | 'terms') => void;
 }
@@ -42,7 +42,7 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick, onNaviga
         elem.scrollIntoView({ behavior: 'smooth' });
       }
     }
-    if (onLinkClick) onLinkClick();
+    if (onLinkClick) onLinkClick(link.href);
   };
 
   const TikTokIcon = () => (

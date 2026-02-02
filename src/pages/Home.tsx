@@ -20,12 +20,14 @@ import type { Testimonial } from '../hooks/useTestimoni';
 import Footer from '../components/Footer';
 import VideoModal from '../components/VideoModal';
 import { PenTool, MessageSquare } from 'lucide-react';
+import type { TeamMember } from '../hooks/useSupabaseData';
 
 interface HomeProps {
-  onNavigateToLegal?: (page: 'home' | 'privacy' | 'terms') => void;
+  onNavigateToLegal?: (page: 'home' | 'privacy' | 'terms' | 'team-profile') => void;
+  onNavigateToTeamProfile?: (member: TeamMember) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onNavigateToLegal }) => {
+const Home: React.FC<HomeProps> = ({ onNavigateToLegal, onNavigateToTeamProfile }) => {
   const [activeGallery, setActiveGallery] = useState<'Photo' | 'Video' | null>(null);
   const [modalVideoUrl, setModalVideoUrl] = useState<string | null>(null);
   const [exitSectionView, setExitSectionView] = useState<'hero' | 'form'>('hero');
@@ -64,7 +66,7 @@ const Home: React.FC<HomeProps> = ({ onNavigateToLegal }) => {
             <main>
               <div id="home"><Hero /></div>
               <BrandCarousel />
-              <AgencySection />
+              <AgencySection onMemberClick={onNavigateToTeamProfile} />
               <WorkSection onSeeAll={(type) => setActiveGallery(type)} onOpenVideo={(url) => setModalVideoUrl(url)} />
               <div id="portfolio"><PortfolioGrid /></div>
               <PackageSection />
