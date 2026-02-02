@@ -275,11 +275,26 @@ export interface TeamMemberAbout {
   expertise: string[];
   achievements: string[];
   whatsapp: string;
-  instagram: string;
-  instagram_2: string | null;
-  project_1: string | null;
-  project_2: string | null;
-  project_3: string | null;
+  created_at: string;
+}
+
+export interface SocialLink {
+  id: string;
+  team_member_about_id: string;
+  platform: string;
+  url: string;
+  created_at: string;
+}
+
+export interface Portfolio {
+  id: string;
+  team_member_about_id: string;
+  type: 'project' | 'certification';
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  order_index: number;
   created_at: string;
 }
 
@@ -341,4 +356,70 @@ export const useTeamMemberAbout = (memberId: string | null) => {
   }, [memberId]);
 
   return { about, loading, error };
+};
+
+export const useTeamMemberProfileDetails = (memberId: string | null) => {
+  const [about, setAbout] = useState<TeamMemberAbout | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [projects, setProjects] = useState<Portfolio[]>([]);
+  const [certifications, setCertifications] = useState<Portfolio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!memberId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        // 1. Fetch About
+        const { data: aboutData, error: aboutError } = await supabase
+          .from('team_member_about')
+          .select('*')
+          .eq('team_member_id', memberId)
+          .single();
+
+        if (aboutError && aboutError.code !== 'PGRST116') throw aboutError;
+        if (!aboutData) {
+          setLoading(false);
+          return;
+        }
+        setAbout(aboutData);
+
+        // 2. Fetch Social Links
+        const { data: socialData, error: socialError } = await supabase
+          .from('team_member_social_links')
+          .select('*')
+          .eq('team_member_about_id', aboutData.id);
+
+        if (socialError) throw socialError;
+        setSocialLinks(socialData || []);
+
+        // 3. Fetch Portfolios (Projects & Certifications)
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('team_member_portfolios')
+          .select('*')
+          .eq('team_member_about_id', aboutData.id)
+          .order('order_index', { ascending: true });
+
+        if (portfolioError) throw portfolioError;
+
+        const allPortfolios = portfolioData || [];
+        setProjects(allPortfolios.filter(p => p.type === 'project'));
+        setCertifications(allPortfolios.filter(p => p.type === 'certification'));
+
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch profile details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [memberId]);
+
+  return { about, socialLinks, projects, certifications, loading, error };
 };

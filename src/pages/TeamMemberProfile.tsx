@@ -1,10 +1,21 @@
-// C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji-1\src\pages\TeamMemberProfile.tsx
+// TeamMemberProfile.tsx
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Mail, ExternalLink, ArrowLeft, Award, Zap, Loader2, AlertCircle } from 'lucide-react';
-import { useTeamMemberAbout } from '../hooks/useSupabaseData';
-import type { TeamMember } from '../hooks/useSupabaseData';
+import {
+    Instagram,
+    Linkedin,
+    Github,
+    Mail,
+    ExternalLink,
+    ArrowLeft,
+    Award,
+    Zap,
+    Loader2,
+    AlertCircle
+} from 'lucide-react';
+import { useTeamMemberProfileDetails } from '../hooks/useSupabaseData';
+import type { TeamMember, Portfolio } from '../hooks/useSupabaseData';
 
 interface TeamMemberProfileProps {
     member: TeamMember;
@@ -14,7 +25,14 @@ interface TeamMemberProfileProps {
 }
 
 const TeamMemberProfile: React.FC<TeamMemberProfileProps> = ({ member, onBack, allMembers, onNavigateToMember }) => {
-    const { about, loading, error } = useTeamMemberAbout(member.id);
+    const {
+        about,
+        socialLinks,
+        projects,
+        certifications,
+        loading,
+        error
+    } = useTeamMemberProfileDetails(member.id);
 
     if (loading) {
         return (
@@ -41,21 +59,20 @@ const TeamMemberProfile: React.FC<TeamMemberProfileProps> = ({ member, onBack, a
         );
     }
 
-    const projects = [
-        { url: about.project_1, id: 1 },
-        { url: about.project_2, id: 2 },
-        { url: about.project_3, id: 3 }
-    ];
+    const getSocialIcon = (platform: string) => {
+        const p = platform.toLowerCase();
+        if (p.includes('instagram')) return <Instagram size={20} />;
+        if (p.includes('linkedin')) return <Linkedin size={20} />;
+        if (p.includes('github')) return <Github size={20} />;
+        if (p.includes('whatsapp')) return <ExternalLink size={20} />;
+        if (p.includes('email') || p.includes('mail')) return <Mail size={20} />;
+        return <ExternalLink size={20} />;
+    };
 
-    const getThumbnailUrl = (url: string) => {
-        if (!url) return null;
-        // If it's an image link
-        if (url.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
-            return url;
-        }
-        // If it's a website link, use a screenshot service
-        if (url.startsWith('http')) {
-            return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(url)}?w=800`;
+    const getThumbnailUrl = (item: Portfolio) => {
+        if (item.image_url) return item.image_url;
+        if (item.link_url) {
+            return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(item.link_url)}?w=800`;
         }
         return null;
     };
@@ -162,33 +179,29 @@ const TeamMemberProfile: React.FC<TeamMemberProfileProps> = ({ member, onBack, a
 
                         <div className="pt-12 border-t border-[#2d2a26]/5 flex flex-col sm:flex-row items-center gap-8 md:gap-12">
                             <div className="flex gap-4">
-                                <motion.a
-                                    whileHover={{ y: -3, backgroundColor: '#c5a059', color: '#fff' }}
-                                    className="w-14 h-14 rounded-full border border-[#c5a059]/20 flex items-center justify-center text-[#c5a059] bg-white transition-all shadow-sm"
-                                    href={about.instagram}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Instagram size={22} />
-                                </motion.a>
-                                {about.instagram_2 && (
-                                    <motion.a
-                                        whileHover={{ y: -3, backgroundColor: '#c5a059', color: '#fff' }}
-                                        className="w-14 h-14 rounded-full border border-[#c5a059]/20 flex items-center justify-center text-[#c5a059] bg-white transition-all shadow-sm"
-                                        href={about.instagram_2}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <Instagram size={22} />
-                                    </motion.a>
-                                )}
-                                <motion.a
-                                    whileHover={{ y: -3, backgroundColor: '#c5a059', color: '#fff' }}
-                                    className="w-14 h-14 rounded-full border border-[#c5a059]/20 flex items-center justify-center text-[#c5a059] bg-white transition-all shadow-sm"
-                                    href={`mailto:hello@ruangimaji.id`}
-                                >
-                                    <Mail size={22} />
-                                </motion.a>
+                                {socialLinks
+                                    .filter(social => !social.platform.toLowerCase().includes('whatsapp'))
+                                    .map((social) => {
+                                        let href = social.url;
+                                        if (social.platform.toLowerCase().includes('email')) {
+                                            const email = social.url.replace('mailto:', '');
+                                            href = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}`;
+                                        }
+
+                                        return (
+                                            <motion.a
+                                                key={social.id}
+                                                whileHover={{ y: -3, backgroundColor: '#c5a059', color: '#fff' }}
+                                                className="w-14 h-14 rounded-full border border-[#c5a059]/20 flex items-center justify-center text-[#c5a059] bg-white transition-all shadow-sm"
+                                                href={href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title={social.platform}
+                                            >
+                                                {getSocialIcon(social.platform)}
+                                            </motion.a>
+                                        );
+                                    })}
                             </div>
 
                             <motion.a
@@ -204,80 +217,120 @@ const TeamMemberProfile: React.FC<TeamMemberProfileProps> = ({ member, onBack, a
                     </motion.div>
                 </div>
 
-                {/* Showcase Section */}
-                <div className="mt-40">
-                    <div className="flex items-center justify-between mb-20 px-0">
-                        <div>
-                            <span className="text-[#c5a059] font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Selected Work</span>
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-[#2d2a26]">Best <span className="italic text-[#c5a059]">Projects</span></h2>
+                {/* Projects Section */}
+                {projects.length > 0 && (
+                    <div className="mt-40">
+                        <div className="flex items-center justify-between mb-20 px-0">
+                            <div>
+                                <span className="text-[#c5a059] font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Selected Work</span>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-[#2d2a26]">Best <span className="italic text-[#c5a059]">Projects</span></h2>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-                        {projects.map((proj) => (
-                            <motion.div
-                                key={proj.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: proj.id * 0.1 }}
-                                viewport={{ once: true }}
-                                className={`group relative aspect-video rounded-3xl overflow-hidden bg-[#2d2a26] ${proj.url ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-                                onClick={() => proj.url && window.open(proj.url, '_blank')}
-                            >
-                                {proj.url ? (
-                                    <>
-                                        {/* Show thumbnail (image or website screenshot) */}
-                                        {getThumbnailUrl(proj.url) ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                            {projects.map((proj, idx) => {
+                                const finalLink = proj.link_url || proj.image_url;
+                                const isActionable = !!finalLink;
+
+                                return (
+                                    <motion.div
+                                        key={proj.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        viewport={{ once: true }}
+                                        className={`group relative aspect-video rounded-3xl overflow-hidden bg-[#2d2a26] ${isActionable ? 'cursor-pointer' : 'cursor-default'}`}
+                                        onClick={() => isActionable && window.open(finalLink, '_blank')}
+                                    >
+                                        {getThumbnailUrl(proj) ? (
                                             <img
-                                                src={getThumbnailUrl(proj.url)!}
-                                                alt={`Project ${proj.id}`}
+                                                src={getThumbnailUrl(proj)!}
+                                                alt={proj.title}
                                                 className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
                                                 onError={(e) => {
-                                                    // Fallback if screenshot fails
-                                                    (e.target as HTMLImageElement).style.display = 'none';
-                                                    const parent = (e.target as HTMLImageElement).parentElement;
-                                                    if (parent) {
-                                                        const placeholder = parent.querySelector('.placeholder-icon');
-                                                        if (placeholder) placeholder.classList.remove('hidden');
-                                                    }
+                                                    (e.target as HTMLImageElement).src = '/IMG_3445.PNG';
+                                                    (e.target as HTMLImageElement).classList.add('opacity-20', 'grayscale');
                                                 }}
                                             />
-                                        ) : null}
-
-                                        {/* Placeholder Icon (shown if no url or if img fails) */}
-                                        <div className={`placeholder-icon absolute inset-0 flex items-center justify-center opacity-40 group-hover:opacity-80 transition-opacity ${getThumbnailUrl(proj.url) ? 'hidden' : ''}`}>
-                                            <ExternalLink size={40} className="text-[#c5a059]" />
-                                        </div>
+                                        ) : (
+                                            <div className="absolute inset-0 bg-white flex items-center justify-center overflow-hidden">
+                                                <img
+                                                    src="/IMG_3445.PNG"
+                                                    alt="Placeholder"
+                                                    className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale brightness-125"
+                                                />
+                                            </div>
+                                        )}
 
                                         <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100 flex items-center gap-3">
-                                                <span className="text-[10px] font-bold text-white uppercase tracking-widest">View Experience</span>
-                                                <ExternalLink size={12} className="text-white" />
-                                            </div>
+                                            {isActionable && (
+                                                <div className="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100 flex items-center gap-3">
+                                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+                                                        {proj.link_url ? 'View Website' : 'View Image'}
+                                                    </span>
+                                                    <ExternalLink size={12} className="text-white" />
+                                                </div>
+                                            )}
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="absolute inset-0 bg-white flex items-center justify-center overflow-hidden">
-                                        <img
-                                            src="/IMG_3445.PNG"
-                                            alt="Coming Soon Background"
-                                            className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale brightness-125"
-                                        />
-                                        <div className="relative z-10 flex flex-col items-center">
-                                            <span className="text-[10px] font-bold text-[#c5a059] uppercase tracking-[0.5em] border border-[#c5a059]/20 px-8 py-3 rounded-full bg-white/50 backdrop-blur-sm">
-                                                Coming Soon
-                                            </span>
+
+                                        <div className="absolute bottom-10 left-10">
+                                            <p className="text-[9px] font-bold uppercase tracking-[0.4em] mb-2 text-[#c5a059]">Featured Production</p>
+                                            <p className={`text-xl md:text-2xl font-serif font-bold ${getThumbnailUrl(proj) ? 'text-white' : 'text-[#2d2a26]'}`}>{proj.title}</p>
                                         </div>
-                                    </div>
-                                )}
-                                <div className="absolute bottom-10 left-10">
-                                    <p className={`text-[9px] font-bold uppercase tracking-[0.4em] mb-2 ${proj.url ? 'text-[#c5a059]' : 'text-[#c5a059]'}`}>Featured Production</p>
-                                    <p className={`text-xl md:text-2xl font-serif font-bold ${proj.url ? 'text-white' : 'text-[#2d2a26]'}`}>Project {proj.id}</p>
-                                </div>
-                            </motion.div>
-                        ))}
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Certifications Section */}
+                {certifications.length > 0 && (
+                    <div className="mt-40">
+                        <div className="flex items-center justify-between mb-20 px-0">
+                            <div>
+                                <span className="text-[#c5a059] font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Recognition</span>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-[#2d2a26]">Certifications & <span className="italic text-[#c5a059]">Awards</span></h2>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                            {certifications.map((cert, idx) => {
+                                const finalLink = cert.link_url || cert.image_url;
+                                const isActionable = !!finalLink;
+
+                                return (
+                                    <motion.div
+                                        key={cert.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        viewport={{ once: true }}
+                                        className={`group relative bg-white border border-[#2d2a26]/5 rounded-3xl p-8 md:p-10 shadow-xl hover:shadow-2xl transition-all ${isActionable ? 'cursor-pointer' : 'cursor-default'}`}
+                                        onClick={() => isActionable && window.open(finalLink, '_blank')}
+                                    >
+                                        <div className="mb-8 aspect-video rounded-2xl overflow-hidden bg-[#f3eee5] border border-[#c5a059]/10">
+                                            {cert.image_url ? (
+                                                <img src={cert.image_url} alt={cert.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-[#c5a059]/5">
+                                                    <Award size={48} className="text-[#c5a059]/20" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <h3 className="text-xl font-serif font-bold text-[#2d2a26] mb-3 group-hover:text-[#c5a059] transition-colors">{cert.title}</h3>
+                                        {cert.description && <p className="text-sm text-[#2d2a26]/40 leading-relaxed line-clamp-2">{cert.description}</p>}
+                                        {isActionable && (
+                                            <div className="mt-6 flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-[#c5a059]">
+                                                {cert.link_url ? 'Verify Online' : 'View Attachment'} <ExternalLink size={10} />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* Navigation to Other Members */}
                 <div className="mt-40 pt-24 border-t border-[#2d2a26]/5">
@@ -331,7 +384,7 @@ const TeamMemberProfile: React.FC<TeamMemberProfileProps> = ({ member, onBack, a
                                     </div>
 
                                     {/* Background Decorative Text */}
-                                    <div className="absolute -right-12 -bottom-16 opacity-[0.02] select-none pointer-events-none group-hover:opacity-[0.06] transition-opacity">
+                                    <div className="absolute -right-12 -bottom-16 opacity-[0.02] select-none pointer-events-none group-hover:opacity-[0.06] transition-opacity overflow-hidden">
                                         <h4 className="text-[12rem] font-serif font-black italic">{otherMember.label}</h4>
                                     </div>
                                 </motion.div>
