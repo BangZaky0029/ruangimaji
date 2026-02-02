@@ -8,6 +8,7 @@ import logo from "../assets/image/imaji_logo_1.png";
 interface FooterProps {
   onLinkClick?: () => void;
   onPortfolioClick?: () => void;
+  onNavigateToLegal?: (page: 'home' | 'privacy' | 'terms') => void;
 }
 
 const NAV_LINKS = [
@@ -18,9 +19,9 @@ const NAV_LINKS = [
   { label: 'Contact', href: '#contact' }
 ];
 
-const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
+const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick, onNavigateToLegal }) => {
   const { categories } = useCategories();
-  
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -60,14 +61,14 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
   return (
     <footer className="bg-white pt-24 pb-12 border-t border-[#c5a059]/10 relative">
       <div className="container mx-auto px-6 md:px-12">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-          
+
           <div className="lg:col-span-1 space-y-6">
             <div className="flex flex-col items-start">
-              <img 
-                src={logo} 
-                alt="RUANG IMAJI" 
+              <img
+                src={logo}
+                alt="RUANG IMAJI"
                 className="h-32 md:h-44 w-auto object-contain -ml-6 -mb-6 grayscale brightness-50"
               />
               <p className="text-sm text-[#2d2a26]/60 leading-relaxed font-light pr-4 mt-2">
@@ -94,8 +95,8 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
             <ul className="space-y-4">
               {NAV_LINKS.map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
+                  <a
+                    href={link.href}
                     onClick={(e) => handleNavClick(e, link)}
                     className="text-sm text-[#2d2a26]/40 hover:text-[#c5a059] transition-all flex items-center gap-2 group"
                   >
@@ -110,11 +111,11 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
           <div className="space-y-8">
             <h4 className="text-xs font-bold uppercase tracking-[0.3em] text-[#2d2a26]">Expertise</h4>
             <ul className="grid grid-cols-1 gap-4">
-              {categories.slice(0, 6).map((cat) => (
-                <li key={cat}>
+              {categories.map((category) => (
+                <li key={category.id}>
                   <span className="text-sm text-[#2d2a26]/40 hover:text-[#2d2a26] cursor-default transition-all flex items-center gap-3">
                     <span className="w-1 h-1 rounded-full bg-[#c5a059]"></span>
-                    {cat}
+                    {category.name}
                   </span>
                 </li>
               ))}
@@ -162,14 +163,14 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick, onPortfolioClick }) => {
               &copy; {new Date().getFullYear()} RUANG IMAJI Creative Agency.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="text-[9px] text-[#2d2a26]/20 hover:text-[#c5a059] uppercase font-bold tracking-widest transition-colors">Privacy Policy</a>
+              <button onClick={() => onNavigateToLegal?.('privacy')} className="text-[9px] text-[#2d2a26]/20 hover:text-[#c5a059] uppercase font-bold tracking-widest transition-colors">Privacy Policy</button>
               <span className="w-1 h-1 rounded-full bg-[#f3eee5]"></span>
-              <a href="#" className="text-[9px] text-[#2d2a26]/20 hover:text-[#c5a059] uppercase font-bold tracking-widest transition-colors">Terms of Service</a>
+              <button onClick={() => onNavigateToLegal?.('terms')} className="text-[9px] text-[#2d2a26]/20 hover:text-[#c5a059] uppercase font-bold tracking-widest transition-colors">Terms of Service</button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
-            <motion.button 
+            <motion.button
               onClick={scrollToTop}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

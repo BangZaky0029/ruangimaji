@@ -10,11 +10,11 @@ import { usePackages } from '../hooks/usePackages';
 const ContactSection: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
-  
+
   // Fix: usePackages hook from usePackages.ts returns 'services' which contains nested packages
   const { services, loading: packagesLoading } = usePackages();
   const { categories, loading: categoriesLoading } = useCategories();
-  
+
   const [formData, setFormData] = useState({
     name: '',
     selectedPackage: '',
@@ -33,8 +33,8 @@ const ContactSection: React.FC = () => {
         (position) => {
           const { latitude, longitude } = position.coords;
           const mapLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
-          setFormData(prev => ({ 
-            ...prev, 
+          setFormData(prev => ({
+            ...prev,
             locationLink: mapLink,
             address: prev.address || "Lokasi saat ini (Link Terlampir)"
           }));
@@ -68,7 +68,7 @@ const ContactSection: React.FC = () => {
 
       <div className="container mx-auto px-6 md:px-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
-          
+
           {/* Left Side: Info & Headline */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -117,7 +117,7 @@ const ContactSection: React.FC = () => {
 
           {/* Right Side: Specialized Booking Form area */}
           <div className="flex flex-col gap-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -129,7 +129,7 @@ const ContactSection: React.FC = () => {
                 <p className="text-[#2d2a26]/40 text-xs">Large scale commercial projects or international expeditions.</p>
               </div>
               <button className="flex items-center gap-3 font-bold uppercase tracking-widest text-[10px] text-[#c5a059] group-hover:text-[#b38d47] whitespace-nowrap">
-                Contact for Quotation 
+                Contact for Quotation
                 <motion.div animate={{ rotate: isFormOpen ? 180 : 0 }}>
                   <ChevronDown size={16} />
                 </motion.div>
@@ -147,36 +147,36 @@ const ContactSection: React.FC = () => {
                 >
                   {loading ? (
                     <div className="p-14 flex items-center justify-center">
-                      <motion.img 
-                        src="/imajiLogo.svg" 
-                        className="w-12 h-12" 
-                        animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }} 
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} 
+                      <motion.img
+                        src="/imajiLogo.svg"
+                        className="w-12 h-12"
+                        animate={{ opacity: [0.3, 1, 0.3], scale: [0.95, 1, 0.95] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       />
                     </div>
                   ) : (
-                    <form 
-                      onSubmit={handleSubmit} 
+                    <form
+                      onSubmit={handleSubmit}
                       className="p-8 md:p-14 rounded-[2.5rem] bg-[#fbfaf8] border border-[#c5a059]/10 shadow-2xl shadow-[#c5a059]/5 space-y-8"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Nama Lengkap</label>
-                          <input 
-                            required 
-                            type="text" 
-                            value={formData.name} 
-                            onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                            placeholder="Contoh: Budi Santoso" 
-                            className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] transition-all text-sm" 
+                          <input
+                            required
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Contoh: Budi Santoso"
+                            className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] transition-all text-sm"
                           />
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Paket</label>
-                          <select 
-                            required 
-                            value={formData.selectedPackage} 
-                            onChange={(e) => setFormData({...formData, selectedPackage: e.target.value})} 
+                          <select
+                            required
+                            value={formData.selectedPackage}
+                            onChange={(e) => setFormData({ ...formData, selectedPackage: e.target.value })}
                             className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
                           >
                             <option value="">Pilih Paket</option>
@@ -186,30 +186,30 @@ const ContactSection: React.FC = () => {
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Kategori</label>
-                          <select 
-                            required 
-                            value={formData.category} 
-                            onChange={(e) => setFormData({...formData, category: e.target.value})} 
+                          <select
+                            required
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             className="bg-[#f3eee5] border-none rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-[#c5a059] text-sm"
                           >
                             <option value="">Pilih Kategori</option>
-                            {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
+                            {categories.map(cat => (<option key={cat.id} value={cat.name}>{cat.name}</option>))}
                           </select>
                         </div>
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-[#2d2a26]/40">Alamat</label>
                           <div className="flex gap-2">
-                            <input 
-                              required 
-                              type="text" 
-                              value={formData.address} 
-                              onChange={(e) => setFormData({...formData, address: e.target.value})} 
-                              placeholder="Alamat lengkap" 
-                              className="flex-grow bg-[#f3eee5] border-none rounded-xl px-4 py-3 text-sm" 
+                            <input
+                              required
+                              type="text"
+                              value={formData.address}
+                              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                              placeholder="Alamat lengkap"
+                              className="flex-grow bg-[#f3eee5] border-none rounded-xl px-4 py-3 text-sm"
                             />
-                            <button 
-                              type="button" 
-                              onClick={handleGetLocation} 
+                            <button
+                              type="button"
+                              onClick={handleGetLocation}
                               className="w-12 h-12 rounded-xl bg-[#f3eee5] flex items-center justify-center hover:bg-[#c5a059] hover:text-white transition-all shrink-0"
                             >
                               {isLocating ? <Loader2 className="animate-spin" size={18} /> : <MapPin size={18} />}
@@ -217,9 +217,9 @@ const ContactSection: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      
-                      <motion.button 
-                        type="submit" 
+
+                      <motion.button
+                        type="submit"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="w-full py-6 bg-[#c5a059] text-white font-bold uppercase tracking-[0.3em] rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#c5a059]/20 hover:bg-[#b38d47]"

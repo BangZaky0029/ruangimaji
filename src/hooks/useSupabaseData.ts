@@ -90,7 +90,7 @@ export const useBrands = () => {
 };
 
 export const useCategories = () => {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,11 +99,11 @@ export const useCategories = () => {
       try {
         const { data, error } = await supabase
           .from('categories')
-          .select('name, slug')
+          .select('id, name, slug, created_at')
           .order('name', { ascending: true });
 
         if (error) throw error;
-        setCategories(data?.map(c => c.slug) || []);
+        setCategories(data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch categories');
       } finally {
