@@ -1,11 +1,13 @@
 
 // C:\codingVibes\landingPages\PersonalPortfolio\ruang-imaji-1\src\components\PackageSection.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Send, ChevronRight, Layout, Star, FileText, AlertCircle, RefreshCcw, Loader2 } from 'lucide-react';
 import { usePackages } from '../hooks/usePackages';
 import type { Service, Package } from '../hooks/usePackages';
 import OrderForm from './OrderForm';
+
+import { translateToIndo } from '../lib/translation';
 
 const WHATSAPP_NUMBER = "6281995770190";
 
@@ -17,89 +19,18 @@ const formatIDR = (amount: number) => {
   }).format(amount).replace('Rp', 'Rp ');
 };
 
-const autoTranslateToIndo = (text: string): string => {
-  const dictionary: Record<string, string> = {
-    "Design Branding": "Desain Branding",
-    "Basic Brand Guidelines": "Panduan Dasar Brand",
-    "Feed Template Designs": "Desain Templat Feed",
-    "Story Template Pack": "Paket Templat Story",
-    "Content Creator": "Kreator Konten",
-    "Feed Posts / Month": "Postingan Feed / Bulan",
-    "Instagram Stories / Week": "Instagram Stories / Minggu",
-    "Professional Caption Writing": "Penulisan Caption Profesional",
-    "Content Scheduling & Posting": "Penjadwalan & Posting Konten",
-    "Website": "Situs Web",
-    "Up to": "Hingga",
-    "Pages": "Halaman",
-    "Responsive Design": "Desain Responsif",
-    "Mobile Friendly": "Ramah Seluler",
-    "Basic SEO Setup": "Pengaturan SEO Dasar",
-    "Contact Form Integration": "Integrasi Formulir Kontak",
-    "Social Media Integration": "Integrasi Media Sosial",
-    "Fast Loading Speed Optimization": "Optimasi Kecepatan Loading Cepat",
-    "1 Month Free Maintenance": "Gratis Pemeliharaan 1 Bulan",
-    "Hosting Setup Guidance": "Panduan Pengaturan Hosting",
-    "Custom UI/UX Design": "Desain UI/UX Kustom",
-    "Fully Responsive & Mobile Optimized": "Responsif Sepenuhnya & Dioptimalkan untuk Seluler",
-    "Advanced SEO Optimization": "Optimasi SEO Lanjutan",
-    "CMS Integration": "Integrasi CMS",
-    "Easy Content Update": "Pembaruan Konten Mudah",
-    "Performance Optimization": "Optimasi Performa",
-    "SSL Certificate": "Sertifikat SSL",
-    "Basic Security": "Keamanan Dasar",
-    "Google Analytics Integration": "Integrasi Google Analytics",
-    "3 Months Maintenance & Support": "Pemeliharaan & Dukungan 3 Bulan",
-    "Training Session for Content Management": "Sesi Pelatihan untuk Manajemen Konten",
-    "Unlimited Pages": "Halaman Tanpa Batas",
-    "Fully Custom Design System & Branding": "Sistem Desain & Branding Kustom Sepenuhnya",
-    "Advanced Responsive Design (All Devices)": "Desain Responsif Lanjutan (Semua Perangkat)",
-    "Enterprise SEO Strategy & Implementation": "Strategi & Implementasi SEO Tingkat Perusahaan",
-    "Headless CMS + API Integration": "Integrasi Headless CMS + API",
-    "E-commerce Ready (Shopping Cart System)": "Siap E-commerce (Sistem Keranjang Belanja)",
-    "Maximum Performance (95+ PageSpeed Score)": "Performa Maksimal (Skor PageSpeed 95+)",
-    "Advanced Security & WAF Protection": "Keamanan Lanjutan & Perlindungan WAF",
-    "Advanced Analytics & Heatmap Tracking": "Analitik Lanjutan & Pelacakan Heatmap",
-    "6 Months Full Maintenance & Updates": "Pemeliharaan & Pembaruan Penuh 6 Bulan",
-    "Complete Training & Documentation": "Pelatihan & Dokumentasi Lengkap",
-    "Priority Support & Dedicated Account Manager": "Dukungan Prioritas & Manajer Akun Khusus",
-    "Lead Photographer": "Fotografer Utama",
-    "Assistant Photographers": "Asisten Fotografer",
-    "Assistant Photographer": "Asisten Fotografer",
-    "Unlimited Session Time": "Waktu Sesi Tanpa Batas",
-    "Session Time": "Waktu Sesi",
-    "Professional Editing": "Editing Profesional",
-    "Photo Session": "Sesi Foto",
-    "Video Highlights": "Cuplikan Video",
-    "Drone Footage": "Rekaman Drone",
-    "High Resolution": "Resolusi Tinggi",
-    "Full Gallery": "Galeri Lengkap",
-    "Teaser Video": "Video Cuplikan",
-    "Cinematic": "Sinematik",
-    "Daily Content Posting": "Postingan Konten Harian",
-    "Account Management": "Manajemen Akun",
-    "Content Creation": "Pembuatan Konten",
-    "Engagement Strategy": "Strategi Interaksi",
-    "Monthly Report": "Laporan Bulanan",
-    "Engagement Session": "Sesi Pertunangan",
-    "Wedding Day": "Hari Pernikahan",
-    "Prewedding": "Prewedding",
-    "Hours of Coverage": "Jam Liputan",
-    "Edited Photos": "Foto Terpilih (Sunting)",
-    "All Raw Files": "Semua File Mentah",
-    "Canvas Print": "Cetak Kanvas",
-    "Premium Album": "Album Premium",
-    "Wooden Box": "Kotak Kayu Exclusive"
-  };
+const AutoTranslate: React.FC<{ text: string }> = ({ text }) => {
+  const [translated, setTranslated] = useState(text);
 
-  if (dictionary[text]) return dictionary[text];
-  const sortedKeys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
-  let translated = text;
-  sortedKeys.forEach((en) => {
-    const id = dictionary[en];
-    const regex = new RegExp(en, 'gi');
-    translated = translated.replace(regex, id);
-  });
-  return translated;
+  useEffect(() => {
+    let isMounted = true;
+    translateToIndo(text).then((res) => {
+      if (isMounted) setTranslated(res);
+    });
+    return () => { isMounted = false; };
+  }, [text]);
+
+  return <>{translated}</>;
 };
 
 const PackageSection: React.FC = () => {
@@ -195,8 +126,8 @@ const PackageSection: React.FC = () => {
                     key={service.id}
                     onClick={() => setActiveServiceIdx(idx)}
                     className={`px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-500 whitespace-nowrap relative group ${activeServiceIdx === idx
-                        ? 'bg-[#c5a059] text-white shadow-lg shadow-[#c5a059]/30 scale-105'
-                        : 'text-[#2d2a26]/30 hover:text-[#2d2a26]'
+                      ? 'bg-[#c5a059] text-white shadow-lg shadow-[#c5a059]/30 scale-105'
+                      : 'text-[#2d2a26]/30 hover:text-[#2d2a26]'
                       }`}
                   >
                     <span className="relative z-10">{getTabLabel(service.name)}</span>
@@ -257,7 +188,7 @@ const PackageSection: React.FC = () => {
                                   </div>
                                   <div className="flex flex-col">
                                     <p className="text-[13px] md:text-sm text-[#2d2a26]/70 leading-relaxed font-medium">{feature.feature}</p>
-                                    <p className="text-[10px] md:text-[11px] text-[#c5a059]/60 italic font-light mt-0.5">{autoTranslateToIndo(feature.feature)}</p>
+                                    <p className="text-[10px] md:text-[11px] text-[#c5a059]/60 italic font-light mt-0.5"><AutoTranslate text={feature.feature} /></p>
                                   </div>
                                 </div>
                               ))}
