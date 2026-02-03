@@ -8,8 +8,7 @@ import type { Service, Package } from '../hooks/usePackages';
 import OrderForm from './OrderForm';
 
 import { translateToIndo } from '../lib/translation';
-
-const WHATSAPP_NUMBER = "6281995770190";
+import { supabase } from '../lib/supabase';
 
 const formatIDR = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
@@ -34,11 +33,49 @@ const AutoTranslate: React.FC<{ text: string }> = ({ text }) => {
 };
 
 const PackageSection: React.FC = () => {
-  const { services, loading, error } = usePackages();
+  const { services, loading: servicesLoading, error: servicesError } = usePackages();
   const [activeServiceIdx, setActiveServiceIdx] = useState(0);
   const [isOrderFormOpen, setIsOrderFormOpen] = useState(false);
+  const [contacts, setContacts] = useState<Record<string, string>>({});
+  const [waLoading, setWaLoading] = useState(true);
 
-  // Reorder services to place Website in the second position
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_member_about')
+          .select('whatsapp, team_members(role)');
+
+        if (error) throw error;
+
+        const mapping: Record<string, string> = {};
+        data?.forEach((item: any) => {
+          const role = item.team_members?.role;
+          const wa = item.whatsapp?.replace(/\+/g, '').replace(/\s/g, '');
+          if (role && wa) {
+            mapping[role] = wa;
+          }
+        });
+        setContacts(mapping);
+      } catch (err) {
+        console.error('Error fetching contacts:', err);
+      } finally {
+        setWaLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, []);
+
+  const getWhatsAppNumber = (serviceName: string) => {
+    const name = serviceName.toUpperCase();
+    if (name.includes('WEBSITE')) {
+      return contacts['IT Developer'] || "6281995770190";
+    }
+    // Creative Director (Ibrahim) for Medsos/Social and Prewedding/Wedding
+    return contacts['Creative Director'] || "62895428433006";
+  };
+
   const sortedServices = useMemo(() => {
     if (!services || services.length < 2) return services;
 
@@ -53,6 +90,15 @@ const PackageSection: React.FC = () => {
   }, [services]);
 
   const activeService = sortedServices[activeServiceIdx] || null;
+
+  const currentWhatsappNumber = useMemo(() => {
+    if (!services || services.length === 0) return "6281995770190";
+    const activeService = sortedServices[activeServiceIdx];
+    return activeService ? getWhatsAppNumber(activeService.name) : "6281995770190";
+  }, [contacts, activeServiceIdx, services, sortedServices]);
+
+  const loading = servicesLoading || waLoading;
+  const error = servicesError;
 
   const getTabLabel = (name: string) => {
     const cleanName = (name || '').replace('Paket ', '').toUpperCase();
@@ -69,12 +115,12 @@ const PackageSection: React.FC = () => {
       `*Harga Promo:* ${discountPrice}\n\n` +
       `*Detail Layanan:*\n${featuresList}\n\n` +
       `Bisa bantu proses selanjutnya?`;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${getWhatsAppNumber(service.name)}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleQuotation = (serviceName: string) => {
     const message = `Halo Ruang Imaji, saya ingin konsultasi mengenai ${serviceName}.`;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${getWhatsAppNumber(serviceName)}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (loading) {
@@ -262,7 +308,8 @@ const PackageSection: React.FC = () => {
             <OrderForm
               onClose={() => setIsOrderFormOpen(false)}
               packages={activeService?.packages || []}
-              whatsappNumber={WHATSAPP_NUMBER}
+              whatsappNumber={currentWhatsappNumber}
+              serviceId={activeService?.id}
             />
           )}
         </AnimatePresence>
